@@ -4,6 +4,8 @@ author: "Mary Piper, Radhika Khetani"
 date: "Thursday, March 3rd, 2016"
 ---
 
+**Learning to use markdown**
+
 Contributors: Mary Piper, Radhika Khetani
 
 Approximate time: 30 minutes
