@@ -1,10 +1,8 @@
 ---
-
-title: "Introduction to ChIP-Seq and directory setup"
-author: "Mary Piper, Radhika Khetani, Meeta Mistry"
-contributor: "Chris Fields (HPCBio, UIUC)"
+title: "Introduction to ChIP-Seq"
+author: "Mary Piper, Radhika Khetani, Meeta Mistry (HSPH), Chris Fields (UIUC)"
 date: "October 30, 2017"
-
+output: revealjs::revealjs_presentation
 ---
 
 ## Learning Objectives
