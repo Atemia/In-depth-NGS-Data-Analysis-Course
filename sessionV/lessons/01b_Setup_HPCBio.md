@@ -2,10 +2,12 @@
 title: "Introduction to ChIP-Seq: Setup"
 author: "Mary Piper, Radhika Khetani, Meeta Mistry (HSPH), Chris Fields (UIUC)"
 date: "October 30, 2017"
-output: revealjs::revealjs_presentation
+output: 
+  revealjs::revealjs_presentation:
+    incremental: true
 ---
 
-## Set-up
+## Set-up {center=true}
 
 Before we get started with the analysis, we need to set up our directory structure.
 
