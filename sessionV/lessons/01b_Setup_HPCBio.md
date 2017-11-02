@@ -4,10 +4,17 @@ author: "Mary Piper, Radhika Khetani, Meeta Mistry (HSPH), Chris Fields (UIUC)"
 date: "October 30, 2017"
 output: 
   revealjs::revealjs_presentation:
-    incremental: true
+    theme: solarized
+    highlight: pygments
+    transition: slide
+    center: false
+    slide_level: 1
+    slide_number: true
 ---
 
-## Set-up {center=true}
+## Set-up
+
+---
 
 Before we get started with the analysis, we need to set up our directory structure.
 
@@ -37,7 +44,7 @@ $ cd chipseq
 
 ---
 
-Now let's setup the directory structure, we are looking for the following structure within the chipseq directory:
+Now let's setup the directory structure, we are looking for the following structure within the `chipseq` directory:
 
 ```text
 chipseq/
