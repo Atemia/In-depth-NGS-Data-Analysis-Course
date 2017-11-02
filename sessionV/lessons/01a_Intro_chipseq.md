@@ -7,9 +7,10 @@ output:
     theme: solarized
     highlight: pygments
     transition: slide
-    center: false
+    self_contained: true
     slide_level: 1
-    slide_number: true
+    reveal_options:
+      slideNumber: true
 ---
 
 # Learning Objectives
