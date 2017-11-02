@@ -9,7 +9,7 @@ output:
     transition: slide
     center: false
     slide_level: 1
-    slide_number: true    
+    slide_number: true
 ---
 
 # Learning Objectives
@@ -24,11 +24,11 @@ Approximate time: 30 minutes
 
 # Introduction to ChIP-Seq
 
----
+--- 
 
-Chromatin immunoprecipitation (ChIP) experiments isolate the chromatin from a cell and immunoprecipitate (IP) DNA fragments bound to a protein of interest. In ChIP-Seq, the DNA fragments are sequenced, enriched regions of DNA or peaks are determined, and over-represented sequence motifs and functional annotations can be identified.
+<img src="../img/chipseq_overall.png" width=400>
 
-![chipseq_overview](../img/chipseq_overall.png)
+<small>Chromatin immunoprecipitation (ChIP) experiments isolate the chromatin from a cell and immunoprecipitate (IP) DNA fragments bound to a protein of interest. In ChIP-Seq, the DNA fragments are sequenced, enriched regions of DNA or peaks are determined, and over-represented sequence motifs and functional annotations can be identified.</small>
 
 ---
 
