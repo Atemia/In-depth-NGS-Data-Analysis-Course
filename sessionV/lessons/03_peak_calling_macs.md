@@ -2,9 +2,19 @@
 title: "Peak calling with MACS2"
 author: "Meeta Mistry"
 date: "June 12th, 2017"
+date: "October 30, 2017"
+output: 
+  revealjs::revealjs_presentation:
+    theme: solarized
+    highlight: pygments
+    transition: slide
+    self_contained: true
+    slide_level: 1
+    reveal_options:
+      slideNumber: true
 ---
 
-Contributors: Meeta Mistry, Radhika Khetani
+Contributors: Meeta Mistry, Radhika Khetani, Chris Fields (UIUC)
 
 Approximate time: 90 minutes
 
