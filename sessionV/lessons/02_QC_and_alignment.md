@@ -44,14 +44,64 @@ We will use FastQC to get a good idea of the overall quality of our data. We wil
 
 Let's run FastQC on all of our files. 
 
-Start an interactive session with 2 cores if don't have one going, and change directories to the `raw_data` folder.
+---
+
+**Start an interactive session with 2 cores** if you don't have one going, and change directories to the `raw_data` folder.
 
 ```bash
 $ cd ~/ngs_course/chipseq/raw_data 
 
-$ module load seq/fastqc/0.11.3 
+---
+
+First, what does the data look like?
+
+```bash
+$ head -n 8 H1hesc_Input_Rep1_chr12.fastq 
+```
+
+---
+
+This is [FASTQ](https://en.wikipedia.org/wiki/FASTQ_format) format.
+
+```text
+[instru03@compute-1-0 raw_data]$ head -n 8 H1hesc_Input_Rep1_chr12.fastq
+
+@ILLUMINA-EAS295:72:70H93AAXX:3:17:5807:13712
+CAATTGAGAATATAATTGCCTTGAAAATAAAAATGT
++
+DGGEDEGEDDEGDD=GGGDG;BB;BGDGDEEDDDBG
+@ILLUMINA-EAS295:72:70H93AAXX:3:18:18252:17693
+TTTATTTTCAAGGCAATTATATTCTCAATTGGCTCT
++
+IIIIIIIIIIFHIIIIIIIIIIIIIIDIIIIDIIID
+```
+
+This contains the actual base calls for each reads from the sequencing run.
+
+---
+
+Next, let's run FASTQC on this:
+
+# Hint: use tab here
+$ module load FastQC/0.11.5-IGB-gcc-4.9.4-Java-1.8.0_121
 
 $ fastqc H1hesc_Input_Rep1_chr12.fastq 
+```
+
+What was generated?
+
+```
+[instru03@compute-1-0 raw_data]$ ls -l
+
+total 191566
+-rw-rw-r-- 1 instru03 instru03 59738626 Nov  6 15:55 H1hesc_Input_Rep1_chr12.fastq
+-rw-rw-r-- 1 instru03 instru03   242724 Nov  6 16:08 H1hesc_Input_Rep1_chr12_fastqc.html
+-rw-rw-r-- 1 instru03 instru03   292563 Nov  6 16:08 H1hesc_Input_Rep1_chr12_fastqc.zip
+-rw-rw-r-- 1 instru03 instru03 36809331 Nov  6 15:55 H1hesc_Input_Rep2_chr12.fastq
+-rw-rw-r-- 1 instru03 instru03 16481860 Nov  6 15:55 H1hesc_Nanog_Rep1_chr12.fastq
+-rw-rw-r-- 1 instru03 instru03 32164197 Nov  6 15:55 H1hesc_Nanog_Rep2_chr12.fastq
+-rw-rw-r-- 1 instru03 instru03 16895456 Nov  6 15:55 H1hesc_Pou5f1_Rep1_chr12.fastq
+-rw-rw-r-- 1 instru03 instru03 33535661 Nov  6 15:55 H1hesc_Pou5f1_Rep2_chr12.fastq
 ```
 
 ---
@@ -62,7 +112,11 @@ Now, move all of the `fastqc` files to the `results/untrimmed_fastqc` directory:
 $ mv *fastqc* ../results/untrimmed_fastqc/
 ```
 
-Transfer the FastQC zip file for Input replicate 1 to your local machine using FileZilla and view the report.
+---
+
+Transfer the FastQC zip file for Input replicate 1 to your local machine using [your favorite SFTP transfer tool](https://help.igb.illinois.edu/File_Server_Access) and view the report.
+
+Here, we will try [Cyberduck](https://help.igb.illinois.edu/File_Server_Access#Connect_From_OSX_Using_CyberDuck_.28Very_Secure.29).  In the instructions, instead of using `file-server.igb.illinois.edu`, we will enter `biologin.igb.illinois.edu`.  
 
 ---
 
@@ -78,19 +132,41 @@ Based on the sequence quality plot, we see across the length of the read the qua
 
 We will use Trimmomatic to trim the reads from both ends of the sequence.
 
-Let's check for the *Trimmomatic* module and load it:
+So, let's do a quick refresher on modules.  First, let's check for the *Trimmomatic* module and load it:
 
 ```bash
-$ module avail seq/
+# this will run a search for partial matches
+$ module avail trim
+```
 
-$ module load seq/Trimmomatic/0.33
+---
 
+Now let's load the module:
+
+```
+$ module load Trimmomatic/0.36-Java-1.8.0_121
+To execute Trimmomatic run: java -jar $EBROOTTRIMMOMATIC/trimmomatic-0.36.jar
+```
+
+Note how it says to run the tool.
+
+---
+  
+What modules are loaded:
+
+```
 $ module list
+```
 
+You can also see how modules make our (command-line) lives a little easier:
+
+```
 $ echo $PATH
 ```
 
 ---
+
+Okay, back to work.
 
 By loading the *Trimmomatic* module, Java and Trimmomatic are loaded and appear in our PATH. 
 
@@ -124,23 +200,29 @@ Now that we know what parameters  we can set up our command. Since we are only t
 
 ---
 
+Remember what the module prompt said about how to run Trimmomatic?
+
 ```bash
-$ java -jar /opt/Trimmomatic-0.33/trimmomatic-0.33.jar SE \
--threads 2 \
--phred33 \
-H1hesc_Input_Rep1_chr12.fastq \
-../results/trimmed/H1hesc_Input_Rep1_chr12.qualtrim20.minlen36.fq \
-LEADING:20 \
-TRAILING:20 \
-MINLEN:36
+$ java -jar $EBROOTTRIMMOMATIC/trimmomatic-0.36.jar SE \
+  -threads 2 \
+  -phred33 \
+  Input_Rep1_chr12.fastq.gz \
+  ../results/trimmed/Input_Rep1_chr12.qualtrim20.minlen36.fq \
+  LEADING:20 \
+  TRAILING:20 \
+  MINLEN:36
 ```
+
+Note the line where we are pushing results:
+
+> `../results/trimmed/Input_Rep1_chr12.qualtrim20.minlen36.fq`
 
 ---
 
 Let's see how much trimming improved our reads by running FastQC again:
 
 ```bash
-$ fastqc ../results/trimmed/H1hesc_Input_Rep1_chr12.qualtrim20.minlen36.fq
+$ fastqc ../results/Input_Rep1_chr12.qualtrim20.minlen36.fq
 ```
 
 ---
@@ -169,6 +251,10 @@ Now that we have removed the poor quality sequences from our data, we are ready 
 
 > _**NOTE:** Our reads are only 36 bp, so technically we should explore alignment Bowtie1 to see if it is better. However, since it is rare that you will have sequencing reads with less than 50 bp, we will show you how to perform alignment using Bowtie2._
 
+# Finding Bowtie2
+
+How would you look for it?
+
 # Creating Bowtie2 index
 
 To perform the Bowtie2 alignment, a genome index is required. **We previously generated the genome indices for you**, and they exist in the `reference_data` directory.
@@ -180,7 +266,9 @@ However, if you needed to create a genome index yourself, you would use the foll
 
 bowtie2-build <path_to_reference_genome.fa> <prefix_to_name_indexes>
 
-# Can find indexes for the entire genome on Orchestra using following path: /groups/shared_databases/igenome/Homo_sapiens/UCSC/hg19/Sequence/Bowtie2Index/
+# Though we don't always recommend it's use, you can find pre-built indexes for 
+# the entire human genome (and other genomes) on biocluster using following path: 
+# /home/mirror/igenome/Homo_sapiens/UCSC/hg19/Sequence/Bowtie2Index/
 ```
 
 # Aligning reads with Bowtie2
@@ -208,6 +296,8 @@ The basic options for aligning reads to the genome using Bowtie2 are:
 ---
 
 ```bash
+$ module load Bowtie2/2.3.2-IGB-gcc-4.9.4
+
 $ bowtie2 -p 2 -q \
 -x ~/ngs_course/chipseq/reference_data/chr12 \
 -U ~/ngs_course/chipseq/results/trimmed/H1hesc_Input_Rep1_chr12.qualtrim20.minlen36.fq \

@@ -15,8 +15,6 @@ output:
 
 # Learning Objectives
 
----
-
 Approximate time: 30 minutes
 
 * Understanding the experimental setup and design for ChIP-Seq experiments
@@ -54,10 +52,11 @@ Several steps are involved in the library preparation of protein-bound DNA fragm
 <img src="../img/chipseq_experimental_workflow.png" width="300">
 
 > 1. After the chromatin is isolated from the cell, proteins are cross-linked to the DNA
-> 2. The DNA is sheared into fragments (sonication)
+> 2. The DNA is sheared into fragments of 200-400bp (may depend on protocol)
 > 3. A protein-specific antibody is used to immunoprecipitate the protein-bound DNA fragments
-> 4. The crosslink is reversed and DNA purified
-> 5. DNA fragments are size selected and amplified using PCR
+> 4. Separate the antibody-bound DNA from unbound genomic DNA
+> 5. The crosslink is reversed and DNA purified
+> 6. DNA fragments are size selected and amplified using PCR
 
 </small>
 
@@ -118,3 +117,169 @@ Below is the workflow that we will be using today, each step in the workflow wil
 
 <img src="../img/chip_workflow_june2017.png" width="500">
 
+---
+
+## Set-up
+
+---
+
+Before we get started with the analysis, we need to set up our directory structure.
+
+[Log in](https://help.igb.illinois.edu/Biocluster2#How_To_Log_Into_The_Cluster) to biocluster2:
+
+```bash
+# use your class ID in place of the one below
+ssh class123@biologin.igb.illinois.edu
+
+# when prompted, enter your password
+```
+
+---
+
+Start an interactive session with two cores:
+
+```bash
+$ srun -c 2 --mem 2000 -p classroom --pty bash
+```
+
+---
+
+Note the prompt change:
+
+```bash
+[instru03@biologin-0 ~]$ srun -c 2 --mem 2000 -p classroom --pty bash
+[instru03@compute-1-0 ~]$
+```
+
+The part in brackets is your user name and the node; the node changed when you started an interactive job.
+
+---
+
+Create a new work directory
+
+```bash
+$ mkdir ngs_course 
+$ cd ~/ngs_course
+```
+
+---
+
+Create a `chipseq` directory and change directories into it:
+
+```bash
+$ mkdir chipseq
+$ cd chipseq
+```
+
+---
+
+Now let's setup the directory structure, we are looking for the following structure within the `chipseq` directory:
+
+```text
+chipseq/
+├── logs/
+├── meta/
+├── raw_data/
+├── reference_data/
+├── results/
+│   ├── bowtie2/
+│   ├── trimmed/
+│   ├── trimmed_fastqc/
+│   └── untrimmed_fastqc/
+└── scripts/
+```
+
+---
+
+This is what we start with (using the `tree` command):
+
+```
+$ tree
+.
+
+0 directories, 0 files
+```
+
+---
+
+Here's how we create this directory structure
+
+```bash
+$ mkdir -p raw_data reference_data scripts logs meta
+
+$ mkdir -p results/untrimmed_fastqc results/trimmed results/trimmed_fastqc results/bowtie2
+```
+
+---
+
+Now, type the `tree` command again:
+
+```
+$ tree
+```
+
+You should see something like this:
+
+```
+.
+├── logs
+├── meta
+├── raw_data
+├── reference_data
+├── results
+│   ├── bowtie2
+│   ├── trimmed
+│   ├── trimmed_fastqc
+│   └── untrimmed_fastqc
+└── scripts
+
+10 directories, 0 files
+```
+
+---
+
+Now that we have the directory structure created, let's copy over the data to perform our quality control and alignment, including our FASTQ files and reference data files:
+
+```bash
+$ cp /home/classroom/hpcbio/chip-seq/raw_data/*.fastq.gz raw_data/
+$ cp /home/classroom/hpcbio/chip-seq/reference/* reference_data/
+```
+
+---
+
+What does `tree` look like now?
+
+---
+
+```
+[instru03@compute-1-0 chipseq]$ tree
+.
+├── logs
+├── meta
+├── raw_data
+│   ├── H1hesc_Input_Rep1_chr12.fastq
+│   ├── H1hesc_Input_Rep2_chr12.fastq
+│   ├── H1hesc_Nanog_Rep1_chr12.fastq
+│   ├── H1hesc_Nanog_Rep2_chr12.fastq
+│   ├── H1hesc_Pou5f1_Rep1_chr12.fastq
+│   └── H1hesc_Pou5f1_Rep2_chr12.fastq
+├── reference_data
+│   ├── chr12.1.bt2
+│   ├── chr12.2.bt2
+│   ├── chr12.3.bt2
+│   ├── chr12.4.bt2
+│   ├── chr12.fa
+│   ├── chr12.rev.1.bt2
+│   └── chr12.rev.2.bt2
+├── results
+│   ├── bowtie2
+│   ├── trimmed
+│   ├── trimmed_fastqc
+│   └── untrimmed_fastqc
+└── scripts
+
+10 directories, 13 files
+```
+
+***
+*This lesson has been developed by members of the teaching team at the [Harvard Chan Bioinformatics Core (HBC)](http://bioinformatics.sph.harvard.edu/). These are open access materials distributed under the terms of the [Creative Commons Attribution license](https://creativecommons.org/licenses/by/4.0/) (CC BY 4.0), which permits unrestricted use, distribution, and reproduction in any medium, provided the original author and source are credited.*
