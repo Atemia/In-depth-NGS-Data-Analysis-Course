@@ -15,11 +15,11 @@ output:
 
 Contributors: Meeta Mistry, Radhika Khetani, Chris Fields (UIUC)
 
-Approximate time: 90 minutes
-
 ---
 
 # Learning Objectives
+
+Approximate time: 90 minutes
 
 * Understand the different components of the MACS2 algorithm
 * Learn to use MACS2 for peak calling
@@ -35,19 +35,30 @@ Peak calling, the next step in our workflow, is a computational method used to i
 
 What we observe from the alignment files is a **strand asymmetry with read densities on the +/- strand, centered around the binding site**. The 5' ends of the selected fragments will form groups on the positive- and negative-strand. The distributions of these groups are then assessed using statistical measures and compared against background (input or mock IP samples) to determine if the binding site is significant.
 
-<img src="../img/chip-fragments.png" width="300" align="middle"></div>
+<img src="../img/chip-fragments.png" width="300" align="middle">
 
 ---
 
-There are various tools that are available for *peak calling*. One of the more commonly used peack callers is MACS2, and we will demonstrate it in this session. *Note that in this Session the term 'tag' and sequence 'read' are used interchangeably.*
+There are various tools that are available for *peak calling*. 
+
+One of the more commonly used peack callers is MACS2, and we will demonstrate it in this session. *Note that in this Session the term 'tag' and sequence 'read' are used interchangeably.*
 
 ---
 
-> **NOTE:** Our dataset is investigating two transcription factors and so our focus is on identifying short degenerate sequences that present as punctate binding sites. ChIP-seq analysis algorithms are specialized in identifying one of **two types of enrichment** (or have specific methods for each): broad domains (i.e. histone modifications that cover entire gene bodies) or narrow peaks (i.e. a transcription factor binding). Narrow peaks are easier to detect as we are looking for regions that have higher amplitude and easier to distinguish from background, compared to broad or dispersed marks. There are also 'mixed' binding profiles which can be hard for algorithms to discern. An example of this is is PolII which binds at promotor and across the length of the gene so we see more mixed signals (narrow and broad).  Other enrichment-based sequencing techniques may also have this characteristic.
+**NOTE:** Our dataset is investigating two transcription factors and so our focus is on identifying short degenerate sequences that present as punctate binding sites. ChIP-seq analysis algorithms are specialized in identifying one of **two types of enrichment** (or have specific methods for each): 
 
-# MACS2
+>* broad domains (i.e. histone modifications that cover entire gene bodies) 
+>* narrow peaks (i.e. a transcription factor binding). 
 
-A commonly used tool for identifying transcription factor binding sites is named [Model-based Analysis of ChIP-Seq (MACS)](https://github.com/taoliu/MACS). The [MACS algorithm](http://genomebiology.biomedcentral.com/articles/10.1186/gb-2008-9-9-r137) captures the influence of genome complexity to evaluate the significance of enriched ChIP regions. Although it was developed for the detection of transcription factor binding sites it is also suited for larger regions.
+---
+
+Narrow peaks are easier to detect as we are looking for regions that have higher amplitude and easier to distinguish from background, compared to broad or dispersed marks. 
+
+There are also 'mixed' binding profiles which can be hard for algorithms to discern. An example of this is is PolII which binds at promotor and across the length of the gene so we see more mixed signals (narrow and broad).  Other sequencing techniques that enrich for certain sequence regions may also have this characteristic.
+
+# MACS
+
+A commonly used tool for identifying transcription factor binding sites is named [Model-based Analysis of ChIP-Seq (MACS)](https://github.com/taoliu/MACS). The [MACS algorithm](http://genomebiology.biomedcentral.com/articles/10.1186/gb-2008-9-9-r137) captures the influence of genome complexity to evaluate the significance of enriched ChIP regions. Although it was initially developed for the detection of transcription factor binding sites, newer versions (MACS2) are also suited for larger regions.
 
 ---
 
@@ -57,16 +68,21 @@ MACS improves the spatial resolution of binding sites through **combining the in
 
 # Removing redundancy
 
-MACS provides different options for dealing with **duplicate tags** at the exact same location, that is tags with the **same coordination and the same strand**. The default is to keep a single read at each location. The `auto` option, which is very commonly used, tells MACS to calculate the maximum tags at the exact same location based on binomal distribution using 1e-5 as pvalue cutoff. Another alternative is to set the `all` option keeps every tags. If an `integer` is given, at most this number of tags will be kept at the same location. This redundancy is addressed for both the ChIP and input samples.
+MACS provides different options for dealing with **duplicate tags** at the exact same location, that is tags with the **same coordination and the same strand**. 
 
-> **Why worry about duplicates?**
+The default is to keep a single read at each location. The `auto` option, which is very commonly used, tells MACS to calculate the maximum tags at the exact same location based on binomal distribution using 1e-5 as pvalue cutoff. 
+
+Another alternative is to set the `all` option keeps every tags. If an `integer` is given, at most this number of tags will be kept at the same location. This redundancy is addressed for both the ChIP and input samples.
+
+# Why worry about duplicates
+
 Reads with same start position are considered duplicates. These duplicates can arise from experimental artefacts, but can also contribute to genuine ChIP-signal.
->
+
 > * **The bad kind of duplicates:** If initial starting material is low this can lead to overamplification of this material before sequencing. Any biases in PCR will compound this problem and can lead to artificially enriched regions. Also blacklisted (repeat) regions with ultra high signal will also be high in duplicates. Masking these regions prior to analysis can help remove this problem.
 > * **The good kind of duplicates:** Duplicates will also exist within highly efficient (or even inefficient ChIP) when deeply sequenced ChIP. Removal of these duplicates can lead to a saturation and so underestimation of the ChIP signal.
 > * **Take-home:** Consider your enrichment efficiency and sequencing depth. But because we cannot distinguish between the good and the bad, best practice is to remove duplicates prior to peak calling.  Retain duplicates for differential binding analysis. Also if you are expecting binding in repetetive regions keep duplicates and multiple mappers.
 
-### Modeling the shift size
+# Modeling the shift size
 
 The tag density around a true binding site should show a **bimodal enrichment pattern**. MACS takes advantage of this bimodal pattern to empirically model the shifting size to better locate the precise binding sites.
 
@@ -76,11 +92,11 @@ To find paired peaks to **build the model**, MACS first scans the whole dataset 
 
 MACS randomly **samples 1,000 of these high-quality peaks**, separates their Watson and Crick tags, and aligns them by the midpoint between their Watson and Crick tag centers. The **distance between the modes of the Watson and Crick peaks in the alignment is defined as 'd'** and represents the estimated fragment length. MACS shifts all the tags by d/2 toward the 3' ends to the most likely protein-DNA interaction sites.
 
-### Scaling libraries
+# Scaling libraries
 
 For experiments in which sequence depth differs between input and treatment samples, MACS linearly scales the **total control tag count to be the same as the total ChIP tag count**. The default behaviour is for the larger sample to be scaled down.
 
-### Effective genome length
+# Effective genome length
 
 To calculate calculate λBG from tag count, MAC2 requires the **effective genome size** or the size of the genome that is mappable. Mappability is related to the uniqueness of the k-mers at a  particular position the genome. Low-complexity and repetitive regions have low uniqueness, which means low mappability. Therefore we need to provide the effective genome length to **correct for the loss of true signals in low-mappable regions**.
 
@@ -90,7 +106,7 @@ The mappability or uniqueness influences the average mapped depth (i.e if the ef
 
 <img src="../img/map_table.png" width=500>
 
-### Peak detection
+# Peak detection
 
 For ChIP-Seq experiments, tag distribution along the genome can be modeled by a Poisson distribution. After MACS shifts every tag, it then slides 2d windows across the genome to find candidate peaks with a significant tag enrichment (default is p < 10e-5). This is a Poisson distribution p-value based on λ. The Poisson is a one parameter model, where the parameter **λ is the expected number of reads in that window**.
 
@@ -103,15 +119,15 @@ Instead of using a uniform λ estimated from the whole genome, MACS uses a dynam
 Overlapping enriched peaks are merged, and each tag position is extended d bases from its center. The location with the highest fragment pileup, hereafter referred to as the summit, is predicted as the precise binding location. The ratio between the ChIP-Seq tag count and λlocal is reported as the fold enrichment.
 
 
-### Estimation of false discovery rate
+# Estimation of false discovery rate
 
 Each peak is considered an independent test and thus, when we encounter thousands of significant peaks detected in a sample we have a multiple testing problem. In MACSv1.4, the FDR was determined empirically by exchanging the ChIP and control samples. However, in MACS2, p-values are now corrected for multiple comparison using the **Benjamini-Hochberg correction**.
 
-## Running MACS2
+# Running MACS2
 
 We will be using the newest version of this tool, MACS2. The underlying algorithm for peak calling remains the same as before, but it comes with some enhancements in functionality. 
 
-### Setting up
+# Setting up
 
 To run MACS2, we will first start an interactive session:
 
@@ -137,7 +153,7 @@ We only have the BAM file for our Input-rep1, but will need alignment informatio
 $ cp /home/classroom/hpcbio/chip-seq/bowtie2/*_aln.bam bowtie2/
 ```
 
-### MACS2 parameters
+# MACS2 parameters
 
 There are seven [major functions](https://github.com/taoliu/MACS#usage-of-macs2) available in MACS2 serving as sub-commands. We will only cover `callpeak` in this lesson, but if you can use `macs2 COMMAND -h` to find out more, if you are interested.
 
@@ -224,9 +240,9 @@ $ macs2 callpeak -t bowtie2/H1hesc_Pou5f1_Rep2_chr12_aln.bam \
 
 ```
 
-## MACS2 Output files
+# MACS2 Output files
 
-### File formats
+# File formats
 Before we start exploring the output of MACS2, we'll briefly talk about some new file formats that we haven't yet encountered in this course.
 
 **BED:**
@@ -259,7 +275,7 @@ Wiggle format (WIG) allows the display of continuous-valued data in a track form
 
 The BedGraph format also allows display of continuous-valued data in track format. This display type is useful for probability scores and transcriptome data. This track type is similar to the wiggle (WIG) format, but unlike the wiggle format, data exported in the bedGraph format are preserved in their original state. For the purposes of visualization, these can be interchangeable.
 
-### MACS2 output files
+# MACS2 output files
 
 ```bash
 $ cd macs2/
