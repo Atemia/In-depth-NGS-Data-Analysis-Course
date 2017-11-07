@@ -27,7 +27,7 @@ Approximate time: 60 minutes
 
 # Quality control of sequence reads
 
-<img src="../img/chip_workflow_june2017_step1.png" width=600>
+<img src="../img/chip_workflow_june2017_step1.png" width=400>
 
 * Now that we have our files and directory structure, we are ready to begin our ChIP-Seq analysis. 
 * For any NGS analysis method, our first step in the workflow is to explore the quality of our reads prior to aligning them to the reference genome and proceeding with downstream analyses. 
@@ -89,6 +89,8 @@ $ module load FastQC/0.11.5-IGB-gcc-4.9.4-Java-1.8.0_121
 
 $ fastqc H1hesc_Input_Rep1_chr12.fastq 
 ```
+
+---
 
 What was generated?
 
@@ -187,8 +189,10 @@ We will run Trimmomatic using the following parameters:
 * `TRAILING`: cut bases off the end of a read, if below a threshold quality
 * `MINLEN`: drop an entire read if it is below a specified length
 
-> *NOTE:* We have to specify the `-threads` parameter because *Trimmomatic* uses all threads on a node by default.
+<small>
+*NOTE:* We have to specify the `-threads` parameter because *Trimmomatic* uses all threads on a node by default.
 
+</small>
 ---
 
 *Trimmomatic* has a variety of other options and parameters:
@@ -204,7 +208,11 @@ We will run Trimmomatic using the following parameters:
 
 Now that we know what parameters  we can set up our command. Since we are only trimming a single file, we will run the command in the interactive session rather than creating a script. Because *Trimmomatic* is java based, it is run using the `java -jar` command. In addition to the options as described above, we have two arguments specifying our input file and output file names. 
 
+<small>
+
 > *NOTE:* `java -jar` calls the Java program, which is needed to run *Trimmomatic*, which is a 'jar' file (`trimmomatic-0.33.jar`). A 'jar' file is a special kind of java archive that is often used for programs written in the Java programming language.  If you see a new program that ends in '.jar', you will know it is a java program that is executed `java -jar` <*location of program .jar file*>. Even though *Trimmomatic* is in our PATH, we still need to specify the full path to the `.jar` file in the command.
+
+</small>
 
 ---
 
@@ -221,9 +229,7 @@ $ java -jar $EBROOTTRIMMOMATIC/trimmomatic-0.36.jar SE \
   MINLEN:36
 ```
 
-Note the line where we are pushing results:
-
-> `../results/trimmed/Input_Rep1_chr12.qualtrim20.minlen36.fq`
+Note the line where we are pushing data to the `results/trimmed` folder.
 
 ---
 
@@ -254,17 +260,25 @@ $ mv ../results/trimmed/*fastqc* ../results/trimmed_fastqc/
 
 ---
 
-Using Filezilla, transfer the file for the trimmed Input replicate 1 FastQC to your computer.
+Using Cyberduck, transfer the file for the trimmed Input replicate 1 FastQC to your computer.
 
 ![trimmed_fastqc](../img/chipseq_trimmed_fastqc.png)
 
 # Alignment
 
-Now that we have removed the poor quality sequences from our data, we are ready to align the reads to the reference genome. Most ChIP-seq experiments do not require gapped alignments because the sequenced reads do not contain them, unlike exon junctions in RNA-seq analyses; therefore, we do not need a splice-aware aligner. We can use a traditional short-read aligner to quickly and accurately align reads to the genome.
+Now that we have removed the poor quality sequences from our data, we are ready to align the reads to the reference genome. 
+
+Most ChIP-seq experiments do not require gapped alignments because the sequenced reads do not contain them, unlike exon junctions in RNA-seq analyses 
+
+Therefore, we do not need a splice-aware aligner. We can use a traditional short-read aligner to quickly and accurately align reads to the genome.
 
 ---
 
-[Bowtie2](http://bowtie-bio.sourceforge.net/bowtie2/manual.shtml) is a fast and accurate alignment tool that indexes the genome with an FM Index based on the Burrows-Wheeler Transform to keep memory requirements low for the alignment process. *Bowtie2* supports gapped, local and paired-end alignment modes and works best for reads that are at least 50 bp (shorter read lengths should use Bowtie1). By default, Bowtie2 will perform a global end-to-end read alignment, which is best for quality-trimmed reads. However, it also has a local alignment mode, which will perform soft-clipping for the removal of poor quality bases or adapters from untrimmed reads.
+[Bowtie2](http://bowtie-bio.sourceforge.net/bowtie2/manual.shtml) is a fast and accurate alignment tool that indexes the genome with an FM Index based on the Burrows-Wheeler Transform to keep memory requirements low for the alignment process. 
+
+*Bowtie2* supports gapped, local and paired-end alignment modes and works best for reads that are at least 50 bp (shorter read lengths should use Bowtie1). 
+
+By default, Bowtie2 will perform a global end-to-end read alignment, which is best for quality-trimmed reads. However, it also has a local alignment mode, which will perform soft-clipping for the removal of poor quality bases or adapters from untrimmed reads.
 
 ---
 
@@ -272,7 +286,7 @@ Now that we have removed the poor quality sequences from our data, we are ready 
 
 # Finding Bowtie2
 
-How would you look for it?
+How would you look for this on the cluster?
 
 # Creating Bowtie2 index
 
@@ -287,12 +301,12 @@ bowtie2-build <path_to_reference_genome.fa> <prefix_to_name_indexes>
 
 # Though we don't always recommend it's use, you can find pre-built indexes for 
 # the entire human genome (and other genomes) on biocluster using following path: 
-# /home/mirror/igenomes/Homo_sapiens/UCSC/hg19/Sequence/Bowtie2Index/
+# /home/mirror/igenome/Homo_sapiens/UCSC/hg19/Sequence/Bowtie2Index/
 ```
 
 ---
 
-It is worth checking out the format for the reference though, so you are aware of it.  Here we are using the chromosome 12 sequence from the UCSC hg19 (human genome release 37, UCSC release 19).
+It is worth quickly checking the format for the reference.  Here we are using the chromosome 12 sequence from the UCSC hg19 (human genome release 37, UCSC release 19).
 
 ```
 $ head -n 10 
@@ -327,7 +341,9 @@ $ cd ~/ngs_course/chipseq/results/bowtie2
 
 ---
 
-We will perform alignment on our single trimmed sample, `H1hesc_Input_Rep1_chr12.qualtrim20.minlen36.fq`. Details on Bowtie2 and its functionality can be found in the [user manual](http://bowtie-bio.sourceforge.net/bowtie2/manual.shtml); we encourage you to peruse through to get familiar with all available options.
+We will perform alignment on our single trimmed sample, `H1hesc_Input_Rep1_chr12.qualtrim20.minlen36.fq`. 
+
+Details on Bowtie2 and its functionality can be found in the [user manual](http://bowtie-bio.sourceforge.net/bowtie2/manual.shtml); we encourage you to peruse through to get familiar with all available options.
 
 ---
 
