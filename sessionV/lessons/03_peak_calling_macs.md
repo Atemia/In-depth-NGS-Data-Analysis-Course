@@ -1,8 +1,7 @@
 ---
 title: "Peak calling with MACS2"
 author: "Meeta Mistry"
-date: "June 12th, 2017"
-date: "October 30, 2017"
+date: "November 6, 2017"
 output: 
   revealjs::revealjs_presentation:
     theme: solarized
@@ -18,7 +17,9 @@ Contributors: Meeta Mistry, Radhika Khetani, Chris Fields (UIUC)
 
 Approximate time: 90 minutes
 
-## Learning Objectives
+---
+
+# Learning Objectives
 
 * Understand the different components of the MACS2 algorithm
 * Learn to use MACS2 for peak calling
@@ -26,50 +27,54 @@ Approximate time: 90 minutes
 
 # Peak Calling
 
-Peak calling, the next step in our workflow, is a computational method used to identify areas in the genome that have been enriched with aligned reads as a consequence of performing a ChIP-sequencing experiment. 
+Peak calling, the next step in our workflow, is a computational method used to identify areas in the genome that have been enriched with aligned reads as a consequence of performing a ChIP-sequencing experiment.
 
 <img src="../img/chip_workflow_june2017_step2.png" width=700>
+
+---
 
 What we observe from the alignment files is a **strand asymmetry with read densities on the +/- strand, centered around the binding site**. The 5' ends of the selected fragments will form groups on the positive- and negative-strand. The distributions of these groups are then assessed using statistical measures and compared against background (input or mock IP samples) to determine if the binding site is significant.
 
 <img src="../img/chip-fragments.png" width="300" align="middle"></div>
 
-There are various tools that are available for peak calling. One of the more commonly used peack callers is MACS2, and we will demonstrate it in this session. *Note that in this Session the term 'tag' and sequence 'read' are used interchangeably.*
+---
 
-> **NOTE:** Our dataset is investigating two transcription factors and so our focus is on identifying short degenerate sequences that present as punctate binding sites. ChIP-seq analysis algorithms are specialized in identifying one of **two types of enrichment** (or have specific methods for each): broad domains (i.e. histone modifications that cover entire gene bodies) or narrow peaks (i.e. a transcription factor binding). Narrow peaks are easier to detect as we are looking for regions that have higher amplitude and easier to distinguish from background, compared to broad or dispersed marks. There are also 'mixed' binding profiles which can be hard for algorithms to discern. An example of this is is PolII which binds at promotor and across the length of the gene so we see more mixed signals (narrow and broad).
+There are various tools that are available for *peak calling*. One of the more commonly used peack callers is MACS2, and we will demonstrate it in this session. *Note that in this Session the term 'tag' and sequence 'read' are used interchangeably.*
 
-## MACS2
+---
+
+> **NOTE:** Our dataset is investigating two transcription factors and so our focus is on identifying short degenerate sequences that present as punctate binding sites. ChIP-seq analysis algorithms are specialized in identifying one of **two types of enrichment** (or have specific methods for each): broad domains (i.e. histone modifications that cover entire gene bodies) or narrow peaks (i.e. a transcription factor binding). Narrow peaks are easier to detect as we are looking for regions that have higher amplitude and easier to distinguish from background, compared to broad or dispersed marks. There are also 'mixed' binding profiles which can be hard for algorithms to discern. An example of this is is PolII which binds at promotor and across the length of the gene so we see more mixed signals (narrow and broad).  Other enrichment-based sequencing techniques may also have this characteristic.
+
+# MACS2
 
 A commonly used tool for identifying transcription factor binding sites is named [Model-based Analysis of ChIP-Seq (MACS)](https://github.com/taoliu/MACS). The [MACS algorithm](http://genomebiology.biomedcentral.com/articles/10.1186/gb-2008-9-9-r137) captures the influence of genome complexity to evaluate the significance of enriched ChIP regions. Although it was developed for the detection of transcription factor binding sites it is also suited for larger regions.
+
+---
 
 MACS improves the spatial resolution of binding sites through **combining the information of both sequencing tag position and orientation.** MACS can be easily used for ChIP-Seq data alone, or with control sample with the increase of specificity. The MACS workflow is depicted below. In this lesson, we will describe the steps in more detail.
 
 <img src="../img/macs_workflow.png" width=500>
 
-
-### Removing redundancy
+# Removing redundancy
 
 MACS provides different options for dealing with **duplicate tags** at the exact same location, that is tags with the **same coordination and the same strand**. The default is to keep a single read at each location. The `auto` option, which is very commonly used, tells MACS to calculate the maximum tags at the exact same location based on binomal distribution using 1e-5 as pvalue cutoff. Another alternative is to set the `all` option keeps every tags. If an `integer` is given, at most this number of tags will be kept at the same location. This redundancy is addressed for both the ChIP and input samples.
 
 > **Why worry about duplicates?**
-Reads with same start position considered duplicates. These duplicates can arise from experimental artefacts, but can also contribute to genuine ChIP-signal.
+Reads with same start position are considered duplicates. These duplicates can arise from experimental artefacts, but can also contribute to genuine ChIP-signal.
 >
 > * **The bad kind of duplicates:** If initial starting material is low this can lead to overamplification of this material before sequencing. Any biases in PCR will compound this problem and can lead to artificially enriched regions. Also blacklisted (repeat) regions with ultra high signal will also be high in duplicates. Masking these regions prior to analysis can help remove this problem.
 > * **The good kind of duplicates:** Duplicates will also exist within highly efficient (or even inefficient ChIP) when deeply sequenced ChIP. Removal of these duplicates can lead to a saturation and so underestimation of the ChIP signal.
 > * **Take-home:** Consider your enrichment efficiency and sequencing depth. But because we cannot distinguish between the good and the bad, best practice is to remove duplicates prior to peak calling.  Retain duplicates for differential binding analysis. Also if you are expecting binding in repetetive regions keep duplicates and multiple mappers.
 
-
 ### Modeling the shift size
 
 The tag density around a true binding site should show a **bimodal enrichment pattern**. MACS takes advantage of this bimodal pattern to empirically model the shifting size to better locate the precise binding sites.
-
 
 To find paired peaks to **build the model**, MACS first scans the whole dataset searching for highly significant enriched regions. *This is done only using the ChIP sample!* Given a sonication size (`bandwidth`) and a high-confidence fold-enrichment (`mfold`), MACS slides two `bandwidth` windows across the genome to find regions with **tags more than `mfold` enriched relative to a random tag genome distribution**. 
 
 <img src="../img/model_shift.png" width=500>
 
 MACS randomly **samples 1,000 of these high-quality peaks**, separates their Watson and Crick tags, and aligns them by the midpoint between their Watson and Crick tag centers. The **distance between the modes of the Watson and Crick peaks in the alignment is defined as 'd'** and represents the estimated fragment length. MACS shifts all the tags by d/2 toward the 3' ends to the most likely protein-DNA interaction sites.
-
 
 ### Scaling libraries
 
@@ -102,29 +107,35 @@ Overlapping enriched peaks are merged, and each tag position is extended d bases
 
 Each peak is considered an independent test and thus, when we encounter thousands of significant peaks detected in a sample we have a multiple testing problem. In MACSv1.4, the FDR was determined empirically by exchanging the ChIP and control samples. However, in MACS2, p-values are now corrected for multiple comparison using the **Benjamini-Hochberg correction**.
 
-
 ## Running MACS2
 
 We will be using the newest version of this tool, MACS2. The underlying algorithm for peak calling remains the same as before, but it comes with some enhancements in functionality. 
-
 
 ### Setting up
 
 To run MACS2, we will first start an interactive session:
 
-	$ bsub -Is -q interactive bash  
-	
+```bash
+$ srun -n 2 --mem 2000 -p classroom --pty bash
+```
+
 We will also need to create a directory for the output generated from MACS2:
 
-	$ mkdir -p ~/ngs_course/chipseq/results/macs2
-	
+```bash
+$ mkdir -p ~/ngs_course/chipseq/results/macs2
+```
+
 Now change directories to the `results` folder:
 
-	$ cd ~/ngs_course/chipseq/results/
-	
+```bash
+$ cd ~/ngs_course/chipseq/results/
+```
+
 We only have the BAM file for our Input-rep1, but will need alignment information for **all 6 files**. We have generated the remaining BAM files for you, so **you will need to copy them over**:
 
-	$ cp /groups/hbctraining/ngs-data-analysis-longcourse/chipseq/bowtie2/* bowtie2/
+```
+$ cp /home/classroom/hpcbio/chip-seq/bowtie2/*_aln.bam bowtie2/
+```
 
 ### MACS2 parameters
 
@@ -160,23 +171,58 @@ There are seven [major functions](https://github.com/taoliu/MACS#usage-of-macs2)
 
 > **NOTE:** Relaxing the q-value does not behave as expected in this case since it is partially tied to peak widths. Ideally, if you relaxed the thresholds, you would simply get more peaks but with MACS2 relaxing thresholds also results in wider peaks.
 
+---
+
+First, let's load the module
+
+```
+$ module load MACS2/2.1.1.20160309-IGB-gcc-4.9.4-Python-2.7.13
+```
+
+---
+
 Now that we have a feel for the different ways we can tweak our command, let's set up the command for our run on Nanog-rep1:
 
 ```
 $ macs2 callpeak -t bowtie2/H1hesc_Nanog_Rep1_chr12_aln.bam \
-	-c bowtie2/H1hesc_Input_Rep1_chr12_aln.bam \
- 	-f BAM -g 1.3e+8 \
-	-n Nanog-rep1 \
-	--outdir macs2
+  -c bowtie2/H1hesc_Input_Rep1_chr12_aln.bam \
+  -f BAM -g 1.3e+8 \
+  -n Nanog-rep1 \
+  --bdg \
+  --outdir macs2
 ```
 
-The tool is quite verbose so you should see lines of text being printed to the terminal, describing each step that is being carried out. If that runs successfully, go ahead and **run the same command on the remaining samples**:
+---
 
-	 $ macs2 callpeak -t bowtie2/H1hesc_Nanog_Rep2_chr12_aln.bam -c bowtie2/H1hesc_Input_Rep2_chr12_aln.bam -f BAM -g 1.3e+8 --outdir macs2 -n Nanog-rep2
-	 
-	 $ macs2 callpeak -t bowtie2/H1hesc_Pou5f1_Rep1_chr12_aln.bam -c bowtie2/H1hesc_Input_Rep1_chr12_aln.bam -f BAM -g 1.3e+8 --outdir macs2 -n Pou5f1-rep1
-	 
-	 $ macs2 callpeak -t bowtie2/H1hesc_Pou5f1_Rep2_chr12_aln.bam -c bowtie2/H1hesc_Input_Rep2_chr12_aln.bam -f BAM -g 1.3e+8 --outdir macs2 -n Pou5f1-rep2
+The tool is quite verbose so you should see lines of text being printed to the terminal describing each step that is being carried out. If that runs successfully, go ahead and **run the same command on the remaining samples**:
+
+```
+$ macs2 callpeak -t bowtie2/H1hesc_Nanog_Rep2_chr12_aln.bam \
+  -c bowtie2/H1hesc_Input_Rep2_chr12_aln.bam \
+  -f BAM -g 1.3e+8 \
+  -n Nanog-rep2 \
+  --bdg \
+  --outdir macs2
+```
+
+```
+$ macs2 callpeak -t bowtie2/H1hesc_Pou5f1_Rep1_chr12_aln.bam \
+  -c bowtie2/H1hesc_Input_Rep1_chr12_aln.bam \
+  -f BAM -g 1.3e+8 \
+  -n Pou5f1-rep1 \
+  --bdg \
+  --outdir macs2 
+```
+
+```
+$ macs2 callpeak -t bowtie2/H1hesc_Pou5f1_Rep2_chr12_aln.bam \
+  -c bowtie2/H1hesc_Input_Rep2_chr12_aln.bam \
+  -f BAM -g 1.3e+8 \
+  -n Pou5f1-rep2 \
+  --bdg \
+  --outdir macs2
+
+```
 
 ## MACS2 Output files
 
@@ -215,10 +261,12 @@ The BedGraph format also allows display of continuous-valued data in track forma
 
 ### MACS2 output files
 
-	$ cd macs2/
-	
-	$ ls -lh
-	
+```bash
+$ cd macs2/
+
+$ ls -lh
+```
+
 There should be 6 files output to the results directory for each of the 4 samples, so a total of 24 files:
 
 * `_peaks.narrowPeak`: BED6+4 format file which contains the peak locations together with peak summit, pvalue and qvalue
@@ -230,18 +278,18 @@ There should be 6 files output to the results directory for each of the 4 sample
 
 Let's first obtain a summary of how many peaks were called in each sample. We can do this by counting the lines in the `.narrowPeak` files:
 
-	$ wc -l *.narrowPeak
+```
+$ wc -l *.narrowPeak
+```
 
 We can also generate plots using the R script file that was output by MACS2. There is a `_model.R` script in the directory. Let's load the R module and run the R script in the command line using the `Rscript` command as demonstrated below:
-<<<<<<< HEAD
 
-=======
->>>>>>> b681cc9aecf74b6aa10cb68bb483f143b578672e
+```
+$ module load R/3.4.1-IGB-gcc-4.9.4
+$ Rscript Nanog-rep1_model.r
+```
 
-	$ module load stats/R/3.2.1
-	$ Rscript Nanog-rep1_model.r
-	
-Now you should see a pdf file in your current directory by the same name. Create the plots for each of the samples and move them over to your laptop using `Filezilla`. 
+Now you should see a pdf file in your current directory by the same name. Create the plots for each of the samples and move them over to your laptop using `Cyberduck`. 
 
 Open up the pdf file for Nanog-rep1. The first plot illustrates **the distance between the modes from which the shift size was determined**. 
 
