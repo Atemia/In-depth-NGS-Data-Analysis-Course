@@ -139,7 +139,7 @@ ssh class123@biologin.igb.illinois.edu
 Start an interactive session with two cores:
 
 ```bash
-$ srun -c 2 --mem 2000 -p classroom --pty bash
+$ srun -n 2 --mem 2000 -p classroom --pty bash
 ```
 
 ---
