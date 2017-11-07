@@ -50,20 +50,21 @@ Let's run FastQC on all of our files.
 
 ```bash
 $ cd ~/ngs_course/chipseq/raw_data 
+```
 
 ---
 
 First, what does the data look like?
 
 ```bash
-$ head -n 8 H1hesc_Input_Rep1_chr12.fastq 
+$ head -n 8 H1hesc_Input_Rep1_chr12.fastq
 ```
 
 ---
 
-This is [FASTQ](https://en.wikipedia.org/wiki/FASTQ_format) format.
+This is [FASTQ format](https://en.wikipedia.org/wiki/FASTQ_format).
 
-```text
+```
 [instru03@compute-1-0 raw_data]$ head -n 8 H1hesc_Input_Rep1_chr12.fastq
 
 @ILLUMINA-EAS295:72:70H93AAXX:3:17:5807:13712
@@ -82,6 +83,7 @@ This contains the actual base calls for each reads from the sequencing run.
 
 Next, let's run FASTQC on this:
 
+```
 # Hint: use tab here
 $ module load FastQC/0.11.5-IGB-gcc-4.9.4-Java-1.8.0_121
 
@@ -123,6 +125,12 @@ Here, we will try [Cyberduck](https://help.igb.illinois.edu/File_Server_Access#C
 ![fastqc](../img/fastqc_input_rep1.png)
 
 Based on the sequence quality plot, we see across the length of the read the quality drops into the low range. Trimming should be performed from both ends of the sequences. 
+
+---
+
+What else is in the report?
+
+---
 
 # Trimmomatic
 
@@ -204,10 +212,10 @@ Remember what the module prompt said about how to run Trimmomatic?
 
 ```bash
 $ java -jar $EBROOTTRIMMOMATIC/trimmomatic-0.36.jar SE \
-  -threads 2 \
+  -threads $SLURM_NTASKS \
   -phred33 \
-  Input_Rep1_chr12.fastq.gz \
-  ../results/trimmed/Input_Rep1_chr12.qualtrim20.minlen36.fq \
+  H1hesc_Input_Rep1_chr12.fastq \
+  ../results/trimmed/H1hesc_Input_Rep1_chr12.qualtrim20.minlen36.fq \
   LEADING:20 \
   TRAILING:20 \
   MINLEN:36
@@ -219,10 +227,21 @@ Note the line where we are pushing results:
 
 ---
 
+You should see something like this:
+
+```text
+TrimmomaticSE: Started with arguments:
+ -threads 1 -phred33 H1hesc_Input_Rep1_chr12.fastq ../results/trimmed/H1hesc_Input_Rep1_chr12.qualtrim20.minlen36.fq LEADING:20 TRAILING:20 MINLEN:36
+Input Reads: 489620 Surviving: 418480 (85.47%) Dropped: 71140 (14.53%)
+TrimmomaticSE: Completed successfully
+```
+
+---
+
 Let's see how much trimming improved our reads by running FastQC again:
 
 ```bash
-$ fastqc ../results/Input_Rep1_chr12.qualtrim20.minlen36.fq
+$ fastqc ../results/trimmed/H1hesc_Input_Rep1_chr12.qualtrim20.minlen36.fq
 ```
 
 ---
@@ -268,8 +287,35 @@ bowtie2-build <path_to_reference_genome.fa> <prefix_to_name_indexes>
 
 # Though we don't always recommend it's use, you can find pre-built indexes for 
 # the entire human genome (and other genomes) on biocluster using following path: 
-# /home/mirror/igenome/Homo_sapiens/UCSC/hg19/Sequence/Bowtie2Index/
+# /home/mirror/igenomes/Homo_sapiens/UCSC/hg19/Sequence/Bowtie2Index/
 ```
+
+---
+
+It is worth checking out the format for the reference though, so you are aware of it.  Here we are using the chromosome 12 sequence from the UCSC hg19 (human genome release 37, UCSC release 19).
+
+```
+$ head -n 10 
+```
+---
+
+This is [FASTA format](https://en.wikipedia.org/wiki/FASTA_format).
+
+```
+[instru03@compute-1-0 raw_data]$ head -n 10 ../reference_data/chr12.fa
+>chr12
+NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
+NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
+NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
+NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
+NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
+NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
+NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
+NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
+NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
+```
+
+---
 
 # Aligning reads with Bowtie2
 
@@ -298,14 +344,51 @@ The basic options for aligning reads to the genome using Bowtie2 are:
 ```bash
 $ module load Bowtie2/2.3.2-IGB-gcc-4.9.4
 
-$ bowtie2 -p 2 -q \
+$ bowtie2 -p $SLURM_NTASKS -q \
 -x ~/ngs_course/chipseq/reference_data/chr12 \
 -U ~/ngs_course/chipseq/results/trimmed/H1hesc_Input_Rep1_chr12.qualtrim20.minlen36.fq \
 -S ~/ngs_course/chipseq/results/bowtie2/H1hesc_Input_Rep1_chr12_aln_unsorted.sam
 
 ```
 > **NOTE:** If you had untrimmed fastq files, you would want use local alignment to perform soft-clipping by including the option `--local`.
->
+
+---
+
+You should see output like this:
+
+```text
+418480 reads; of these:
+  418480 (100.00%) were unpaired; of these:
+    45644 (10.91%) aligned 0 times
+    302306 (72.24%) aligned exactly 1 time
+    70530 (16.85%) aligned >1 times
+89.09% overall alignment rate
+```
+
+---
+
+What does the alignment file look like?
+
+```
+$ head -n 20 ~/ngs_course/chipseq/results/bowtie2/H1hesc_Input_Rep1_chr12_aln_unsorted.sam
+```
+
+---
+
+This is [SAM format](https://en.wikipedia.org/wiki/SAM_(file_format)).
+
+```text
+@HD     VN:1.0  SO:unsorted
+@SQ     SN:chr12        LN:133851895
+@PG     ID:bowtie2      PN:bowtie2      VN:2.3.2        CL:"/home/apps/software/Bowtie2/2.3.2-IGB-gcc-4.9.4/bin/bowtie2-align-s --wrapper basic-0 -p 1 -q -x /home/a-m/instru03/ngs_course/chipseq/reference_data/chr12 -S /home/a-m/instru03/ngs_course/chipseq/results/bowtie2/H1hesc_Input_Rep1_chr12_aln_unsorted.sam -U /home/a-m/instru03/ngs_course/chipseq/results/trimmed/H1hesc_Input_Rep1_chr12.qualtrim20.minlen36.fq"
+ILLUMINA-EAS295:72:70H93AAXX:3:17:5807:13712    16      chr12   1000084 42      36M     *       0       0       ACATTTTTATTTTCAAGGCAATTATATTCTCAATTG    GBDDDEEDGDGB;BB;GDGGG=DDGEDDEGEDEGGD    AS:i:0  XN:i:0  XM:i:0  XO:i:0  XG:i:0  NM:i:0  MD:Z:36 YT:Z:UU
+ILLUMINA-EAS295:72:70H93AAXX:3:18:18252:17693   0       chr12   1000089 42      36M     *       0       0       TTTATTTTCAAGGCAATTATATTCTCAATTGGCTCT    IIIIIIIIIIFHIIIIIIIIIIIIIIDIIIIDIIID    AS:i:0  XN:i:0  XM:i:0  XO:i:0  XG:i:0  NM:i:0  MD:Z:36 YT:Z:UU
+...
+```
+
+These text files can become very large, about double the size from the original FASTQ file.
+
+---
 
 # Filtering reads
 
@@ -331,10 +414,27 @@ While the SAM alignment file output by Bowtie2 is human readable, we need a BAM 
 ---
 
 ```bash
+$ module load SAMtools/1.5-IGB-gcc-4.9.4
+
 $ samtools view -h -S -b \
 -o H1hesc_Input_Rep1_chr12_aln_unsorted.bam \
 H1hesc_Input_Rep1_chr12_aln_unsorted.sam
 ```
+
+---
+
+The output is a [BAM file](https://en.wikipedia.org/wiki/Binary_Alignment_Map):
+
+```bash
+$ ls -lh 
+total 101797
+-rw-rw-r-- 1 instru03 instru03 19255572 Nov  6 22:26 H1hesc_Input_Rep1_chr12_aln_unsorted.bam
+-rw-rw-r-- 1 instru03 instru03 84984011 Nov  6 22:16 H1hesc_Input_Rep1_chr12_aln_unsorted.sam
+```
+
+Note the BAM file size is significantly smaller than the original SAM output; BAM is a binary compressed format.  It is **not** human readable, though; this format is optimized for compression and data analysis.
+
+---
 
 You can find additional parameters for the samtools functions in the [manual](http://www.htslib.org/doc/samtools-1.2.html).
 
@@ -349,10 +449,26 @@ The command we will use is `sambamba sort` with the following parameters:
 ---
 
 ```bash
-$ sambamba sort -t 2 \
+$ module load sambamba/0.6.6
+$ sambamba sort -t $SLURM_NTASKS \
 -o H1hesc_Input_Rep1_chr12_aln_sorted.bam \
 H1hesc_Input_Rep1_chr12_aln_unsorted.bam 
 ```
+
+---
+
+Note the outputs:
+
+```bash
+[instru03@compute-1-0 bowtie2]$ ls -l
+total 120426
+-rw-rw-r-- 1 instru03 instru03 18821020 Nov  6 22:31 H1hesc_Input_Rep1_chr12_aln_sorted.bam
+-rw-rw-r-- 1 instru03 instru03   254128 Nov  6 22:31 H1hesc_Input_Rep1_chr12_aln_sorted.bam.bai
+-rw-rw-r-- 1 instru03 instru03 19255572 Nov  6 22:26 H1hesc_Input_Rep1_chr12_aln_unsorted.bam
+-rw-rw-r-- 1 instru03 instru03 84984011 Nov  6 22:16 H1hesc_Input_Rep1_chr12_aln_unsorted.sam
+```
+
+There is a `.bai` file that is generated; this is a BAM index file, which is very useful for processing sortd alignment data.  `sambamba` generates this for you automatically when you sort a BAM file; if you use `samtools` you would need to do this in a second step.
 
 # 3. Filtering uniquely mapping reads
 
@@ -366,7 +482,7 @@ Finally, we can filter the uniquely mapped reads. We will use the `sambamba view
 ---
 
 ```bash
-$ sambamba view -h -t 2 -f bam \
+$ sambamba view -h -t $SLURM_NTASKS -f bam \
 -F "[XS] == null and not unmapped " \
 H1hesc_Input_Rep1_chr12_aln_sorted.bam > H1hesc_Input_Rep1_chr12_aln.bam
 ```
