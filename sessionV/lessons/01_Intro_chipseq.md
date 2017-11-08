@@ -1,14 +1,15 @@
 ---
 title: "Introduction to ChIP-Seq"
 author: "Mary Piper, Radhika Khetani, Meeta Mistry (HSPH), Chris Fields (UIUC)"
-date: "October 30, 2017"
-output: 
+date: "November 7, 2017"
+output:
   revealjs::revealjs_presentation:
     theme: solarized
     highlight: pygments
     transition: slide
     self_contained: true
     slide_level: 1
+    css: styles.css
     reveal_options:
       slideNumber: true
 ---
@@ -23,9 +24,10 @@ Approximate time: 30 minutes
 
 # Introduction to ChIP-Seq
 
---- 
+---
 
-<img src="../img/chipseq_overall.png" width=400>
+<center><img src="../img/chipseq_overall.png" width=300></center>
+
 
 <small>Chromatin immunoprecipitation (ChIP) experiments isolate the chromatin from a cell and immunoprecipitate (IP) DNA fragments bound to a protein of interest. In ChIP-Seq, the DNA fragments are sequenced, enriched regions of DNA or peaks are determined, and over-represented sequence motifs and functional annotations can be identified.</small>
 
@@ -33,7 +35,7 @@ Approximate time: 30 minutes
 
 During this session we will be performing a complete workflow for ChIP-Seq analysis, starting with experimental design and generation of the raw sequencing reads and ending with functional enrichment analyses and motif discovery.
 
-![chipseq_workflow_general](../img/chipseq_workflow_general.png)
+<center><img src="../img/chipseq_workflow_general.png"></center>
 
 ---
 
@@ -43,13 +45,13 @@ During this session we will be performing a complete workflow for ChIP-Seq analy
 
 Several steps are involved in the library preparation of protein-bound DNA fragments for sequencing:
 
-![chipseq_experimental_workflow](../img/chipseq_experimental_workflow.png)
+<center><img src="../img/chipseq_experimental_workflow.png"></center>
 
 ---
 
 <small>
 
-<img src="../img/chipseq_experimental_workflow.png" width="300">
+<center><img src="../img/chipseq_experimental_workflow.png" width="300"></center>
 
 > 1. After the chromatin is isolated from the cell, proteins are cross-linked to the DNA
 > 2. The DNA is sheared into fragments of 200-400bp (may depend on protocol)
@@ -76,7 +78,7 @@ In addition, when performing ChIP-Seq, some sequences may appear enriched due to
 
 Therefore, proper controls are essential. A ChIP-Seq peak should be compared with the same region of the genome in a matched control.
 
-<img src="../img/chipseq_exp_peaks.png" width="800">
+<center><img src="../img/chipseq_exp_peaks.png" width="800"></center>
 
 ---
 
@@ -86,7 +88,7 @@ The same starting material should be divided to be used for both the protein-spe
 > * No antibody ("mock IP")
 > * Non-specific antibody (IgG "mock IP")
 
-![chipseq_exp_controls](../img/chipseq_exp_controls.png)
+<center><img src="../img/chipseq_exp_controls.png"></center>
 
 ---
 
@@ -94,14 +96,14 @@ The same starting material should be divided to be used for both the protein-spe
 
 ---
 
-* Our goal for this session is to compare the the binding profiles of [Nanog](http://www.nature.com/stemcells/2009/0909/090910/full/stemcells.2009.118.html) and [Pou5f1](http://www.nature.com/cr/journal/v12/n5/full/7290134a.html) (Oct4). 
-* The ChIP was performed on H1 human embryonic stem cell line (h1-ESC) cells, and sequenced using Illumina. 
-* The datasets were obtained from the [HAIB TFBS ENCODE collection](http://hgdownload.cse.ucsc.edu/goldenpath/hg19/encodeDCC/wgEncodeHaibTfbs/). 
+* Our goal for this session is to compare the the binding profiles of [Nanog](http://www.nature.com/stemcells/2009/0909/090910/full/stemcells.2009.118.html) and [Pou5f1](http://www.nature.com/cr/journal/v12/n5/full/7290134a.html) (Oct4).
+* The ChIP was performed on H1 human embryonic stem cell line (h1-ESC) cells, and sequenced using Illumina.
+* The datasets were obtained from the [HAIB TFBS ENCODE collection](http://hgdownload.cse.ucsc.edu/goldenpath/hg19/encodeDCC/wgEncodeHaibTfbs/).
 * These 2 transcription factors are involved in **stem cell pluripotency** and one of the goals is to understand their roles, individually and together, in transcriptional regulation.
 
 ---
 
-<img src="../img/chipseq_exp_design.png" width=500>
+<center><img src="../img/chipseq_exp_design.png" width=500></center>
 
 Two replicates were collected and each was divided into 3 aliquots for the following:
 
@@ -115,7 +117,7 @@ For these 6 samples, we will be using reads from only a 32.8 Mb of chromosome 12
 
 Below is the workflow that we will be using today, each step in the workflow will require the data to be in a specific type of standardized format.
 
-<img src="../img/chip_workflow_june2017.png" width="500">
+<center><img src="../img/chip_workflow_june2017.png" width="500"></center>
 
 ---
 
@@ -158,7 +160,7 @@ The part in brackets is your user name and the node; the node changed when you s
 Create a new work directory
 
 ```bash
-$ mkdir ngs_course 
+$ mkdir ngs_course
 $ cd ~/ngs_course
 ```
 

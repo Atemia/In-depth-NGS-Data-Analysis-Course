@@ -9,6 +9,7 @@ output:
     transition: slide
     self_contained: true
     slide_level: 1
+    css: styles.css
     reveal_options:
       slideNumber: true
 ---
@@ -27,7 +28,7 @@ Approximate time: 60 minutes
 
 # Quality control of sequence reads
 
-<img src="../img/chip_workflow_june2017_step1.png" width=400>
+<center><img src="../img/chip_workflow_june2017_step1.png" width=400></center>
 
 * Now that we have our files and directory structure, we are ready to begin our ChIP-Seq analysis. 
 * For any NGS analysis method, our first step in the workflow is to explore the quality of our reads prior to aligning them to the reference genome and proceeding with downstream analyses. 
@@ -124,11 +125,13 @@ Here, we will try [Cyberduck](https://help.igb.illinois.edu/File_Server_Access#C
 
 ---
 
-![fastqc](../img/fastqc_input_rep1.png)
+<center><img src="../img/fastqc_input_rep1.png"></center>
 
 Based on the sequence quality plot, we see across the length of the read the quality drops into the low range. Trimming should be performed from both ends of the sequences. 
 
 ---
+
+# Question
 
 What else is in the report?
 
@@ -206,11 +209,12 @@ We will run Trimmomatic using the following parameters:
 
 ---
 
-Now that we know what parameters  we can set up our command. Since we are only trimming a single file, we will run the command in the interactive session rather than creating a script. Because *Trimmomatic* is java based, it is run using the `java -jar` command. In addition to the options as described above, we have two arguments specifying our input file and output file names. 
+Now that we know what parameters  we can set up our command. Since we are only trimming a single file, we will run the command in the interactive session rather than creating a script. 
 
+Because *Trimmomatic* is Java based, it is run using the `java -jar` command. In addition to the options as described above, we have two arguments specifying our input file and output file names. 
 <small>
 
-> *NOTE:* `java -jar` calls the Java program, which is needed to run *Trimmomatic*, which is a 'jar' file (`trimmomatic-0.33.jar`). A 'jar' file is a special kind of java archive that is often used for programs written in the Java programming language.  If you see a new program that ends in '.jar', you will know it is a java program that is executed `java -jar` <*location of program .jar file*>. Even though *Trimmomatic* is in our PATH, we still need to specify the full path to the `.jar` file in the command.
+>*NOTE:* `java -jar` calls the Java program, which is needed to run *Trimmomatic*, which is a 'jar' file (`trimmomatic-0.33.jar`). A 'jar' file is a special kind of java archive that is often used for programs written in the Java programming language.  If you see a new program that ends in '.jar', you will know it is a java program that is executed `java -jar` <*location of program .jar file*>. Even though *Trimmomatic* is in our PATH, we still need to specify the full path to the `.jar` file in the command.
 
 </small>
 
@@ -262,7 +266,7 @@ $ mv ../results/trimmed/*fastqc* ../results/trimmed_fastqc/
 
 Using Cyberduck, transfer the file for the trimmed Input replicate 1 FastQC to your computer.
 
-![trimmed_fastqc](../img/chipseq_trimmed_fastqc.png)
+<center><img src="../img/chipseq_trimmed_fastqc.png"></center>
 
 # Alignment
 
@@ -276,15 +280,15 @@ Therefore, we do not need a splice-aware aligner. We can use a traditional short
 
 [Bowtie2](http://bowtie-bio.sourceforge.net/bowtie2/manual.shtml) is a fast and accurate alignment tool that indexes the genome with an FM Index based on the Burrows-Wheeler Transform to keep memory requirements low for the alignment process. 
 
-*Bowtie2* supports gapped, local and paired-end alignment modes and works best for reads that are at least 50 bp (shorter read lengths should use Bowtie1). 
-
 By default, Bowtie2 will perform a global end-to-end read alignment, which is best for quality-trimmed reads. However, it also has a local alignment mode, which will perform soft-clipping for the removal of poor quality bases or adapters from untrimmed reads.
 
 ---
 
+*Bowtie2* supports gapped, local and paired-end alignment modes and works best for reads that are at least 50 bp (shorter read lengths should use Bowtie1). 
+
 > _**NOTE:** Our reads are only 36 bp, so technically we should explore alignment Bowtie1 to see if it is better. However, since it is rare that you will have sequencing reads with less than 50 bp, we will show you how to perform alignment using Bowtie2._
 
-# Finding Bowtie2
+# Question: Finding Bowtie2
 
 How would you look for this on the cluster?
 
@@ -366,7 +370,7 @@ $ bowtie2 -p $SLURM_NTASKS -q \
 -S ~/ngs_course/chipseq/results/bowtie2/H1hesc_Input_Rep1_chr12_aln_unsorted.sam
 
 ```
-> **NOTE:** If you had untrimmed fastq files, you would want use local alignment to perform soft-clipping by including the option `--local`.
+> **NOTE:** If you had untrimmed fastq files, you would want to use local alignment to perform soft-clipping by including the option `--local`.
 
 ---
 
@@ -389,8 +393,6 @@ What does the alignment file look like?
 $ head -n 20 ~/ngs_course/chipseq/results/bowtie2/H1hesc_Input_Rep1_chr12_aln_unsorted.sam
 ```
 
----
-
 This is [SAM format](https://en.wikipedia.org/wiki/SAM_(file_format)).
 
 ```text
@@ -402,7 +404,7 @@ ILLUMINA-EAS295:72:70H93AAXX:3:18:18252:17693   0       chr12   1000089 42      
 ...
 ```
 
-These text files can be very large, about double the size from the trimmed FASTQ file.
+These text files can be very large, about double the size from the trimmed FASTQ file.  These can be compressed though...
 
 ---
 
@@ -418,9 +420,9 @@ Therefore we need to filter our alignment files to **contain only uniquely mappi
 
 Since there is no parameter in Bowtie2 to keep only uniquely mapping reads, we will need to perform the following steps to generate alignment files containing only the uniquely mapping reads:
 
-1. Change alignment file format from SAM to BAM
-2. Sort BAM file by read coordinate locations
-3. Filter to keep only uniquely mapping reads (this will also remove any unmapped reads)
+>1. Change alignment file format from SAM to BAM
+>2. Sort BAM file by read coordinate locations
+>3. Filter to keep only uniquely mapping reads (this will also remove any unmapped reads)
 
 # 1. Changing file format from SAM to BAM
 
@@ -440,8 +442,6 @@ $ samtools view -h -S -b \
 -o H1hesc_Input_Rep1_chr12_aln_unsorted.bam \
 H1hesc_Input_Rep1_chr12_aln_unsorted.sam
 ```
-
----
 
 The output is a [BAM file](https://en.wikipedia.org/wiki/Binary_Alignment_Map):
 
@@ -507,7 +507,9 @@ $ sambamba view -h -t $SLURM_NTASKS -f bam \
 H1hesc_Input_Rep1_chr12_aln_sorted.bam > H1hesc_Input_Rep1_chr12_aln.bam
 ```
 
-We filtered out unmapped reads by specifying in the filter `not unmapped`. Also, among the reads that were aligned, we filtered out multimappers by specifying `[XS] == null`. `XS` is a tag generated by Bowtie2 that gives an alignment score for the second-best alignment, and it is only present if the read is aligned and more than one alignment was found for the read.
+We filtered out unmapped reads by specifying in the filter `not unmapped`. 
+
+Also, among the reads that were aligned, we filtered out multimappers by specifying `[XS] == null`. `XS` is a tag generated by Bowtie2 that gives an alignment score for the second-best alignment, and it is only present if the read is aligned and more than one alignment was found for the read.
 
 ---
 
