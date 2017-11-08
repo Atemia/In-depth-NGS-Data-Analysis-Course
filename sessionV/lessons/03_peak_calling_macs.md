@@ -1,7 +1,7 @@
 ---
 title: "Peak calling with MACS2"
 author: "Meeta Mistry"
-date: "November 6, 2017"
+date: "November 7, 2017"
 output: 
   revealjs::revealjs_presentation:
     theme: solarized

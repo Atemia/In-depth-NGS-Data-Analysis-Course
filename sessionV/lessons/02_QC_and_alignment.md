@@ -1,7 +1,7 @@
 ---
 title: "FastQC and alignment"
 author: "Mary Piper, Radhika Khetani (HSPH), Chris Fields (UIUC)"
-date: "October 30, 2017"
+date: "November 7, 2017"
 output: 
   revealjs::revealjs_presentation:
     theme: solarized
