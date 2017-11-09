@@ -1,7 +1,17 @@
 ---
 title: "Handling replicates"
 author: "Meeta Mistry"
-date: "Monday, June 27th, 2017"
+date: "November 7, 2017"
+output: 
+  revealjs::revealjs_presentation:
+    theme: solarized
+    highlight: pygments
+    transition: slide
+    self_contained: true
+    slide_level: 1
+    css: styles.css
+    reveal_options:
+      slideNumber: true
 ---
 
 Contributors: Meeta Mistry, Radhika Khetani 
@@ -26,7 +36,6 @@ Since we have 2 replicates in this example, we want to consider only those peaks
 Common methods for handling replicates includes taking overlapping peak calls across replicates and then assessing differences in binding regions. Additionally, there are more complex methods that employ statistical testing and evaluate the reproducibility between replicates. In this lesson we will cover both methods.
 
 > **NOTE: A recent talk on "Accessing and using ENCODE data" [linked here](https://hstalks.com/t/2679/accessing-and-using-encode-data/?biosci) where they talk about handling replicates and the similarities and differences when using an overlap versus IDR analysis.**
-
 
 ## Overlapping peaks
 
