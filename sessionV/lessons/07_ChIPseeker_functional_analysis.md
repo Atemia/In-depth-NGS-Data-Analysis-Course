@@ -1,12 +1,22 @@
 ---
 title: "ChIPseeker for ChIP peak Annotation, Comparison, and Visualization"
 author: "Meeta Mistry"
-date: "June 12, 2017"
+date: "November 7, 2017"
+output: 
+  revealjs::revealjs_presentation:
+    theme: solarized
+    highlight: pygments
+    transition: slide
+    self_contained: true
+    slide_level: 1
+    css: styles.css
+    reveal_options:
+      slideNumber: true
 ---
 
 Contributors: Mary Piper and Meeta Mistry
 
-Approximate time: 1.5 hours
+Approximate time: 90 min
 
 ## Learning Objectives
 
