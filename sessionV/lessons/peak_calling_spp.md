@@ -36,17 +36,22 @@ SPP is an R package which can be installed in one of two ways: There is [source 
 
 Start an interactive session with a single core (if you don't already have one going) since we are working with such a small dataset; for parallel processing options with SPP see note below.
 
-	$ bsub -Is -q interactive bash
+```bash
+$ srun -n 2 --mem 2000 -p classroom --pty bash
+```
 
 Now let's setup the directory structure. Navigate to `~/ngs_course/chipseq/` if you are not already there. Within the results directory we will create directory called `spp`:
 
-	$ mkdir results/spp
-	$ cd results
-	
+```bash
+$ mkdir results/spp
+$ cd results
+```
+
 The last thing we need to before getting started is to load the appropriate software. As mentioned, SPP is an R package. On Orchestra the package comes installed by default when you load the most recent R module:
 
-	$ module load stats/R/3.2.1
-	
+```bash
+$ module load R/3.4.1-IGB-gcc-4.9.4
+```
 
 > ### Parallel processing with SPP
 > 	
@@ -63,11 +68,15 @@ To run SPP, there are several functions that need to be run sequentially. For mo
 
 For this class, we have put together an R script that contains all of the methods required for peak calling. You can copy over the script into your current directory, and then we can discuss the methods in more detail.
 
-	$ cp /groups/hbctraining/ngs-data-analysis-longcourse/chipseq/scripts/get_peaks.R .
+```
+$ cp /groups/hbctraining/ngs-data-analysis-longcourse/chipseq/scripts/get_peaks.R .
+```
 
 Open it up using `vim`, as there is a modification we need to make in order for you to be able to run this from your working directory. Use `:set number` in `vim` to add numbers to your lines. Now scroll down to line 16. Here, you need to change the path to where your `spp` directory is located. It will look something like this:
 
-	/home/user_name/ngs_course/chipseq/results/spp/
+```
+/home/user_name/ngs_course/chipseq/results/spp/
+```
 
 Save and exit vim. We can now run this script from the command line by using the `Rscript` command followed by the name of our script and need to pass in two arguments:
 
@@ -76,7 +85,9 @@ Save and exit vim. We can now run this script from the command line by using the
 
 Let's try running it on Nanog-rep1:
 
-	$ Rscript get_peaks.R bowtie2/H1hesc_Input_Rep1_chr12_aln.bam bowtie2/H1hesc_Nanog_Rep1_chr12_aln.bam
+```
+$ Rscript get_peaks.R bowtie2/H1hesc_Input_Rep1_chr12_aln.bam bowtie2/H1hesc_Nanog_Rep1_chr12_aln.bam
+```
 
 Before we look at the output, we'll first take some time to discuss whats inside our R script. 
 
