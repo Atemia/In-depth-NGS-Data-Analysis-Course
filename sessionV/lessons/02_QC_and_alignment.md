@@ -1,5 +1,5 @@
 ---
-title: "FastQC and alignment"
+title: "FastQC, Alignment, and Filtering"
 author: "Mary Piper, Radhika Khetani (HSPH), Chris Fields (UIUC)"
 date: "November 7, 2017"
 output: 
@@ -25,6 +25,7 @@ Approximate time: 60 minutes
 * to use previous knowledge of quality control steps to perform FastQC
 * to learn how to use Trimmomatic to perform quality trimming
 * to understand parameters and perform alignment using Bowtie2
+* to learn basic filtering of alignment data (in BAM files)
 
 # Quality control of sequence reads
 
@@ -214,7 +215,7 @@ Now that we know what parameters  we can set up our command. Since we are only t
 Because *Trimmomatic* is Java based, it is run using the `java -jar` command. In addition to the options as described above, we have two arguments specifying our input file and output file names. 
 <small>
 
->*NOTE:* `java -jar` calls the Java program, which is needed to run *Trimmomatic*, which is a 'jar' file (`trimmomatic-0.33.jar`). A 'jar' file is a special kind of java archive that is often used for programs written in the Java programming language.  If you see a new program that ends in '.jar', you will know it is a java program that is executed `java -jar` <*location of program .jar file*>. Even though *Trimmomatic* is in our PATH, we still need to specify the full path to the `.jar` file in the command.
+>*NOTE:* `java -jar` calls the Java program, which is needed to run *Trimmomatic*, which is a 'jar' file (`trimmomatic-0.36.jar`). A 'jar' file is a special kind of java archive that is often used for programs written in the Java programming language.  If you see a new program that ends in '.jar', you will know it is a java program that is executed `java -jar` <*location of program .jar file*>. Even though *Trimmomatic* is in our PATH, we still need to specify the full path to the `.jar` file in the command.
 
 </small>
 
