@@ -45,7 +45,7 @@ During this session we will be performing a complete workflow for ChIP-Seq analy
 
 Several steps are involved in the library preparation of protein-bound DNA fragments for sequencing:
 
-<center><img src="../img/chipseq_experimental_workflow.png"></center>
+<center><img src="../img/chipseq_experimental_workflow.png" width="300"></center>
 
 ---
 
@@ -64,7 +64,11 @@ Several steps are involved in the library preparation of protein-bound DNA fragm
 
 ---
 
-Within the DNA fragments enriched for the regions binding to a protein of interest, only a fraction correspond to actual signal. The proportion of DNA fragments containing the actual binding site of the protein depends on the **number of active binding sites, the number of starting genomes, and the efficiency of the IP**.
+Within the DNA fragments enriched for the regions binding to a protein of interest, only a fraction correspond to actual signal. The proportion of DNA fragments containing the actual binding site of the protein depends on:
+
+>- the **number of active binding sites**
+>- the **number of starting genomes**
+>- the **efficiency of the IP**
 
 ---
 
@@ -96,7 +100,7 @@ The same starting material should be divided to be used for both the protein-spe
 
 ---
 
-* Our goal for this session is to compare the the binding profiles of [Nanog](http://www.nature.com/stemcells/2009/0909/090910/full/stemcells.2009.118.html) and [Pou5f1](http://www.nature.com/cr/journal/v12/n5/full/7290134a.html) (Oct4).
+* Our goal for this session is to compare the binding profiles of [Nanog](http://www.nature.com/stemcells/2009/0909/090910/full/stemcells.2009.118.html) and [Pou5f1](http://www.nature.com/cr/journal/v12/n5/full/7290134a.html) (Oct4).
 * The ChIP was performed on H1 human embryonic stem cell line (h1-ESC) cells, and sequenced using Illumina.
 * The datasets were obtained from the [HAIB TFBS ENCODE collection](http://hgdownload.cse.ucsc.edu/goldenpath/hg19/encodeDCC/wgEncodeHaibTfbs/).
 * These 2 transcription factors are involved in **stem cell pluripotency** and one of the goals is to understand their roles, individually and together, in transcriptional regulation.

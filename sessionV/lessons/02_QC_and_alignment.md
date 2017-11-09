@@ -35,7 +35,7 @@ Approximate time: 60 minutes
 
 ---
 
-We will use FastQC to get a good idea of the overall quality of our data. We will use FastQC to identify whether any samples appear to be outliers, to examine our data for contamination, and to determine a trimming strategy.
+We will use [FastQC](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/) to get a good idea of the overall quality of our data. We will use FastQC to identify whether any samples appear to be outliers, to examine our data for contamination, and to determine a trimming strategy.
 
 >**NOTE:** We will trim poor quality bases and/or adapters prior to alignment because that was the workflow previously used by ENCODE. However, we do not need to trim as the downstream alignment tool, Bowtie2, has an option for soft-clipping.
 
@@ -119,7 +119,7 @@ $ mv *fastqc* ../results/untrimmed_fastqc/
 
 ---
 
-Transfer the FastQC zip file for Input replicate 1 to your local machine using [your favorite SFTP transfer tool](https://help.igb.illinois.edu/File_Server_Access) and view the report.
+Transfer the FastQC zip file and HTML report for Input replicate 1 to your local machine using [your favorite SFTP transfer tool](https://help.igb.illinois.edu/File_Server_Access) and view the report.
 
 Here, we will try [Cyberduck](https://help.igb.illinois.edu/File_Server_Access#Connect_From_OSX_Using_CyberDuck_.28Very_Secure.29).  In the instructions, instead of using `file-server.igb.illinois.edu`, we will enter `biologin.igb.illinois.edu`.  
 
@@ -313,7 +313,7 @@ bowtie2-build <path_to_reference_genome.fa> <prefix_to_name_indexes>
 It is worth quickly checking the format for the reference.  Here we are using the chromosome 12 sequence from the UCSC hg19 (human genome release 37, UCSC release 19).
 
 ```
-$ head -n 10 
+$ head -n 10 ../reference_data/chr12.fa
 ```
 ---
 
