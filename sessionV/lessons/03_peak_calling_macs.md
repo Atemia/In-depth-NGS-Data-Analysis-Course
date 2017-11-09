@@ -69,9 +69,7 @@ MACS improves the spatial resolution of binding sites through **combining the in
 
 ---
 
-The MACS workflow is depicted below. In this lesson, we will describe the steps in more detail.
-
-<center><img src="../img/macs_workflow.png" width=300></center>
+<center><img src="../img/macs_workflow.png" width=400></center>The MACS workflow is depicted below. In this lesson, we will describe the steps in more detail.
 
 # Removing redundancy
 
@@ -109,7 +107,7 @@ To find paired peaks to **build the model**, MACS first scans the whole dataset 
 
 <center><img src="../img/model_shift.png" width=300></center>
 
-Given a sonication size (`bandwidth`) and a high-confidence fold-enrichment (`mfold`), MACS slides two `bandwidth` windows across the genome to find regions with **tags more than `mfold` enriched relative to a random tag genome distribution**. 
+Given a sonication size (`bandwidth`) and a high-confidence fold-enrichment (`mfold`), MACS slides 2x`bandwidth` windows across the genome to find regions with **tags more than `mfold` enriched relative to a random tag genome distribution**. 
 
 ---
 
@@ -149,7 +147,7 @@ This is a Poisson distribution p-value based on λ. The Poisson is a one paramet
 
 ----
 
-Instead of using a uniform λ estimated from the whole genome, MACS uses a dynamic parameter, λlocal, defined for each candidate peak. 
+Instead of using a uniform λ (λBG) estimated from the whole genome, MACS uses a dynamic parameter, λlocal, defined for each candidate peak.
 
 The lambda parameter is estimated from the **control sample** and is deduced by **taking the maximum value across various window sizes: λlocal = max(λBG, λ1k, λ5k, λ10k).** 
 
@@ -414,8 +412,10 @@ The second plot is the  **cross-correlation plot**. This is a graphical represen
 
 Transfer over the Excel file and look through the results as well.  Note the q-value is denoted as -log10Q (for scaling).  How would you convert this a standard q-value?
 
-> **NOTE:** [SPP](http://www.nature.com.ezp-prod1.hul.harvard.edu/nbt/journal/v26/n12/full/nbt.1508.html) is also very commonly used for narrow peak calling. While we will not be going through the steps for this peak caller in this Session, we do have [a lesson on SPP](https://github.com/HPCBio/In-depth-NGS-Data-Analysis-Course/blob/may2017/sessionV/lessons/peak_calling_spp.md) that we encourage you to browse through if you are interested in learning more.
+---
 
+> **NOTE:** [SPP](http://www.nature.com.ezp-prod1.hul.harvard.edu/nbt/journal/v26/n12/full/nbt.1508.html) is also commonly used for narrow peak calling. 
+> While we will not be going through the steps for this peak caller in this Session, there is [a lesson on SPP](https://github.com/HPCBio/In-depth-NGS-Data-Analysis-Course/blob/HPCBio-Fall2017/sessionV/lessons/peak_calling_spp.md).  We encourage you to browse through if you are interested in learning more; please let Chris know if you are interested in this, we can ask our collaborators at HSPH about getting the helper R script for that lesson. 
 
 ***
 *This lesson has been developed by members of the teaching team at the [Harvard Chan Bioinformatics Core (HBC)](http://bioinformatics.sph.harvard.edu/). These are open access materials distributed under the terms of the [Creative Commons Attribution license](https://creativecommons.org/licenses/by/4.0/) (CC BY 4.0), which permits unrestricted use, distribution, and reproduction in any medium, provided the original author and source are credited.*
