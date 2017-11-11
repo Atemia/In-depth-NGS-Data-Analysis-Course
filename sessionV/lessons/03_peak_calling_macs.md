@@ -6,7 +6,7 @@ output:
   revealjs::revealjs_presentation:
     theme: solarized
     highlight: pygments
-    transition: slide
+    transition: fade
     self_contained: true
     slide_level: 1
     css: styles.css
