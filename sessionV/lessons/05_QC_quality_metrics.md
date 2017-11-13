@@ -1,73 +1,64 @@
 ---
 title: "ChIP-Seq Quality Assessment"
 author: "Mary Piper, Meeta Mistry"
-date: "November 7, 2017"
-output: 
-  revealjs::revealjs_presentation:
-    theme: solarized
-    highlight: pygments
-    transition: slide
-    self_contained: true
-    slide_level: 1
-    css: styles.css
-    reveal_options:
-      slideNumber: true
+date: "June 12, 2017"
 ---
 
 Contributors: Mary Piper and Meeta Mistry
 
-# Learning Objectives
+Approximate time: 1.5 hours
 
-Approximate time: 90 min
+## Learning Objectives
 
 * Discuss other quality metrics for evaluating ChIP-Seq data
 * Generate a report containing quality metrics using `ChIPQC`
 * Identify sources of low quality data
 
-# Additional Quality Metrics for ChIP-seq data
 
-<center><img src="../img/chip_workflow_june2017_step3.png" width=700></center>
+
+## Additional Quality Metrics for ChIP-seq data
+
+<img src="../img/chip_workflow_june2017_step3.png" width=700>
 
 The [ENCODE consortium](https://genome.ucsc.edu/ENCODE/qualityMetrics.html) analyzes the quality of the data produced using a variety of metrics. We have already discussed metrics related to strand cross-correlation such as NSC and RSC. In this section, we will provide descriptions of additional metrics that **assess the distribution of signal within enriched regions, within/across expected annotations, across the whole genome, and within known artefact regions.**
 
 > **NOTE**: For some of the metrics we give examples of what is considered a 'good measure' indicative of good quality data. Keep in mind that passing this threshold does not automatically mean that an experiment is successful and a values that fall below the threshold does not automatically mean failure!
 
-# SSD
+
+### SSD
 
 The SSD score is a measure used to indicate evidence of enrichment. It provides a measure of pileup across the genome and is computed by looking at the **standard deviation of signal pile-up along the genome normalised to the total number of reads**. An enriched sample typically has regions of significant pile-up so a higher SSD is more indicative of better enrichment. SSD scores are dependent on the degree of total genome wide signal pile-up and so are sensitive to regions of high signal found with Blacklisted regions as well as genuine ChIP enrichment. 
 
 
-# FRiP: Fraction of reads in peaks
+### FRiP: Fraction of reads in peaks
 
 This value reports the percentage of reads that overlap within called peaks.  This is another good indication of how ”enriched” the sample is, or the success of the immunoprecipitation. It can be considered a **”signal-to-noise” measure of what proportion of the library consists of fragments from binding sites vs. background reads**. FRiP values will vary depending on the protein of interest. A typical good quality TF with successful enrichment would exhibit a FRiP around 5% or higher. A good quality PolII would exhibit a FRiP of 30% or higher. There are also known examples of	good data with FRiP < 1% (i.e. RNAPIII).
 	
 
-# Relative Enrichment of Genomic Intervals (REGI)
+### Relative Enrichment of Genomic Intervals (REGI)
 
 Using the genomic regions identified as called peaks, we can obtain **genomic annotation to show where reads map in terms of various genomic features**. We then evaluate the relative enrichment across these regions and make note of how this compares to what we expect for enrichment for our protein of interest.
 
 
-# RiBL: Reads overlapping in Blacklisted Regions
+### RiBL: Reads overlapping in Blacklisted Regions
 
 It is important to keep track of and filter artifact regions that tend to show **artificially high signal** (excessive unstructured anomalous reads mapping). As such the DAC Blacklisted Regions track was generated for the ENCODE modENCODE consortia. The blacklisted regions **typically appear uniquely mappable so simple mappability filters do not remove them**. These regions are often found at specific types of repeats such as centromeres, telomeres and satellite repeats. 
 
-<center><img src="../img/blacklist.png" width=600></center>
-
----
+<img src="../img/blacklist.png" width=600>
 
 These regions tend to have a very high ratio of multi-mapping to unique mapping reads and high variance in mappability. **The signal from blacklisted regions has been shown to contribute to confound peak callers and fragment length estimation.** The RiBL score then may act as a guide for the level of background signal in a ChIP or input and is found to be correlated with SSD in input samples and the read length cross coverage score in both input and ChIP samples. These regions represent around 0.5% of genome, yet can account for high proportion of total signal (> 10%).
 
----
-
 > **How were the 'blacklists compiled?** These blacklists were empirically derived from large compendia of data using a combination of automated heuristics and manual curation. Blacklists were generated for various species including and genome versions including human, mouse, worm and fly. The lists can be [downloaded here.](http://mitra.stanford.edu/kundaje/akundaje/release/blacklists/). For human, they used 80 open chromatin tracks (DNase and FAIRE datasets) and 12 ChIP-seq input/control tracks spanning ~60 cell lines in total. These blacklists are applicable to functional genomic data based on short-read sequencing (20-100bp reads). These are not directly applicable to RNA-seq or any other transcriptome data types. 
 
----
+
 
 ## `ChIPQC`: quality metrics report
 
-`ChIPQC` is a Bioconductor package that takes as input BAM files and peak calls to automatically **compute a number of quality metrics and generates a ChIPseq experiment quality report**. We are going to use this package to generate a report for our Nanog and Pou5f1 samples.
+`ChIPQC` is a Bioconductor package that takes as input BAM files and peak calls to automatically **compute a number of quality metrics and generates a ChIPseq
+experiment quality report**. We are going to use this package to generate a report for our Nanog and Pou5f1 samples.
 
 ### Setting up 
+
 
 1. Open up RStudio and create a new project for your ChIP-seq analyses on your Desktop. Select 'File' -> 'New Project' -> 'New directory' and call the new directory `chipseq-project`.
 2. Create a directory structure for your analyses. You will want to create four directories: `data`, `meta`, `results`, and `figures`.
@@ -76,7 +67,8 @@ These regions tend to have a very high ratio of multi-mapping to unique mapping 
 
 Your Rstudio interface should look something like the screenshot below:
 
-<center><img src="../img/rstudio-screenshot.png"></center>
+<img src="../img/rstudio-screenshot.png">
+
 
 > **NOTE:** This next section assumes you have the `ChIPQC` package (vChIPQC_1.10.3 or higher) installed for R 3.3.3. If you haven't done this please run the following lines of code before proceeding.
 >
@@ -87,19 +79,19 @@ biocLite("ChIPQC")
 
 ### Getting data 
 
-Now let's move over the appropriate files from Biocluster2 to our laptop. You can do this using `Cyberduck`.
+Now let's move over the appropriate files from Orchestra to our laptop. You can do this using `FileZilla` or the `scp` command.
 
 1. Move over the **BAM files (`chr12_aln.bam`)** and the corresponding **indices (`chr12_aln.bam.bai`)** from `~/ngs_course/chipseq/results/bowtie2` to your laptop. You will want to copy these files into your chipseq-project **into the `data/bams` folder.**
 
 > *NOTE*: Do not copy over the input file that we initially ran QC and alignment on (i.e `H1hesc_Input_Rep1_chr12_aln_sorted.bam`). Only the files you had copied over to your home directory is what you need.
 
----
 
 2. Move over the **narrowPeak files (`.narrowPeak`)** `~/ngs_course/chipseq/results/macs2` to your laptop. You will want to copy these files into your chipseq-project **into the `data/peakcalls` folder.**
 
-3. Download the sample data sheet available from [this link](https://raw.githubusercontent.com/HPCBio/In-depth-NGS-Data-Analysis-Course/HPCBio-Fall2017/sessionV/samplesheet_chr12.csv). Move the samplesheet into the `meta` folder.
+3. Download the sample data sheet available from [this link](https://github.com/hbctraining/In-depth-NGS-Data-Analysis-Course/raw/may2017/sessionV/samplesheet_chr12.csv). Move the samplesheet into the `meta` folder.
 
-# Running `ChIPQC`
+
+### Running `ChIPQC` 
 
 Let's start by loading the `ChIPQC` library and the samplesheet into R. Use the `View()` function to take a look at what the samplesheet contains.
 
@@ -143,13 +135,15 @@ ChIPQCreport(chipObj, reportName="ChIP QC report: Nanog and Pou5f1", reportFolde
 
 If you were unable to run the code successfully you can take a look an example report found [here](https://u35207958.dl.dropboxusercontent.com/u/35207958/chipseq-devel/ChIPQCreport/ChIP%20QC%20report%3A%20Nanog%20and%20Pou5f1.html).
 
+
 ### `ChIPQC` report
 
-Since our report is based only on a small subset of data, the figures will not be as meaningful. **Take a look at the report generated using the full dataset instead.** [Open up the report](https://u35207958.dl.dropboxusercontent.com/u/35207958/chipseq-devel/ChIPQCreport-full/ChIP%20QC%20report%20full%3A%20Nanog%20and%20Pou5f1.html) in your browser. At the top left you should see a button labeled 'Expand All', click on that to expand all sections.
+
+Since our report is based only on a small suubset of data, the figures will not be as meaningful. **Take a look at the report generated using the full dataset instead.** [Open up the report](https://u35207958.dl.dropboxusercontent.com/u/35207958/chipseq-devel/ChIPQCreport-full/ChIP%20QC%20report%20full%3A%20Nanog%20and%20Pou5f1.html) in your browser. At the top left you should see a button labeled 'Expand All', click on that to expand all sections.
 
 Let's start with the **QC summary table**:
 
-<center><img src="../img/QCsummary.png"></center>
+<img src="../img/QCsummary.png">
 
 Here, we see the metrics mentioned above (SSD, RiP and RiBL). A higher SSD is more indicative of better enrichment. Higher scores are obseved for the Pou5f1 replicates and so greatest enrichment for depth of signal. SSD scores are dependent on the degree of total genome wide signal pile-up and so are sensitive to regions of high signal found with Blacklisted regions as well as genuine ChIP enrichment. The RiBL percentages are not incredibly high (also shown in the plot in the  next section) and FriP percentages are around 5% or higher, except for Pou5f1-rep2. 
 
@@ -159,30 +153,34 @@ The next table contains **the mapping quality, and duplication rate,** however s
 
 Next is a plot showing the effect of blacklisting, with the proportion of reads that do and do not overlap with blacklisted regions. The final plot in this section uses the genomic annotation to show **where reads map in terms of genomic features**. This is represented as a heatmap showing the enrichment of reads compared to the background levels of the feature. We find that there is most enrichment in promotor regions. This plot is useful when you expect enrichment of specific genomic regions.  
  
-<center><img src="../img/GenomicFeatureEnrichment.png" width=500></center>
+<img src="../img/GenomicFeatureEnrichment.png" width=500>
 
 The next section, **ChIP Signal Distribution and Structure**, looks at the inherent ”peakiness” of the samples. The first plot is a **coverage histogram**. The x-axis represents the read pileup height at a basepair position, and the y-axis represents how many positions have this pileup height. This is on a log scale. **A ChIP sample with good enrichment should have a reasonable ”tail”, that is more positions (higher values on the y-axis) having higher sequencing depth**. 
 Samples with low enrichment (i.e input), consisting of mostly background reads will have lower genome wide low pile-up. In our dataset, the Nanog samples have quite heavy tails compared to Pou5f1, especially replicate 2. The SSD scores, however, are higher for Pou5f1. When SSD is high but coverage looks low it is possibly due to the presence of large regions of high depth and a flag for blacklisting of genomic regions. The cross-correlation plot which is displayed next is one we have already covered. 
 
-<center><img src="../img/CoverageHistogramPlot.png" width=500></center>
+<img src="../img/CoverageHistogramPlot.png" width=500>
+
+
 
 The final set of plots, **Peak Profile and ChIP Enrichment**, are based on metric computed using the supplied peaks if available. The first plot shows average peak profiles, centered on the summit (point of highest pileup) for each peak.
 
-<center><img src="../img/PeakProfile.png" width=500></center>
+<img src="../img/PeakProfile.png" width=500>
 
 The **shape of these profiles can vary depending on what type of mark is being studied** – transcription factor, histone mark, or other DNA-binding protein such as a polymerase – but similar marks usually have a distinctive profile in successful ChIPs. 
 
 Next we have two plots that summarize the number of **Reads in Peaks**. ChIP samples with good enrichment will have a higher proportion of their reads overlapping called peaks. Although RiP is higher in Nanog, the boxplot for the Nanog samples shows quite different distributions between the replicates compared to Pou5f1.
 
-<center><img src="../img/Rip.png" width=500></center>
+<img src="../img/Rip.png" width=500>
 
-<center><img src="../img/Rap.png" width=500></center>
+<img src="../img/Rap.png" width=500>
+
 
 Finally, there are plots to show **how the samples are clustered**. The correlation heatmap is based on correlation values for all the peak scores for each sample. The other plot shows the first two principal component values for each sample. In our dataset, the replicates do cluster by replicate for Pou5f1, which is a positive sign. For Nanog we see that Replicate 1 appears to correlate slightly better with Pou5f1 than with Replicate 2. The PCA also demonstrates distance between the Nanog replicates.
 
-<center><img src="../img/PeakCorHeatmap.png" width=500></center>
+<img src="../img/PeakCorHeatmap.png" width=500>
 
-<center><img src="../img/PeakPCA.png" width=500></center>
+<img src="../img/PeakPCA.png" width=500>
+
 
 In general, our data look good. There is some discordance apparent between the Nanog replicates and this combined with lower SSD scores might indicate that while there are many peaks identified it is mainly due to noise. 
 
@@ -206,6 +204,9 @@ The way in which sonication is carried out can result in different fragment size
 * **Biases during library preparation:** 
 
 *PCR amplification:* Biases arise because DNA sequence content and length determine the kinetics of annealing and denaturing in each cycle of PCR. The combination of temperature profile, polymerase and buffer used during PCR can therefore lead to differential efficiencies in amplification between different sequences, which could be exacerbated with increasing PCR cycles. This is often manifest as a bias towards GC rich fragments [[2]](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4473780/). **Limited use of PCR amplification is recommended because bias increases with every PCR cycle.**
+
+
+
 
 ***
 
