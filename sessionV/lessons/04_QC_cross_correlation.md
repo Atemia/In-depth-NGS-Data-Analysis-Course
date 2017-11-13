@@ -10,7 +10,8 @@ Approximate time: 1.5 hours
 
 * Discussing sources of low quality ChIP-seq data
 * Understanding strand cross-correlation
-* Using `phantompeakqualtools` to compute cross-correlation and associated QC metrics
+* Using `phantompeakqualtools` to compute cross-correlation and associated QC
+  metrics
 * Evaluating the cross-correlation plot
 
 ## ChIP-Seq quality assessment
@@ -114,8 +115,6 @@ mappability properties of the mapped reads.
 
 <img src="../img/input.png" width=300>
 
-
-
 ### Cross-correlation quality metrics
 
 Using the cross-correlation plot we can **compute metrics for assessing
@@ -128,9 +127,13 @@ metrics are described in more detail below:
 
 The ratio of the maximal cross-correlation value divided by the background
 cross-correlation (minimum cross-correlation value over all possible strand
-shifts). **Higher values indicate more enrichment, values less than 1.1 are
+shifts).
+
+**Higher values indicate more enrichment, values less than 1.1 are
 relatively low NSC scores, and the minimum possible value is 1 (no
-enrichment).** Datasets with NSC values much less than 1.05 tend to have low
+enrichment).**
+
+Datasets with NSC values much less than 1.05 tend to have low
 signal to noise or few peaks (this could be biological, such as a factor that
 truly binds only a few sites in a particular tissue type or it could be due to
 poor quality).
@@ -139,14 +142,16 @@ poor quality).
 
 The ratio of the fragment-length cross-correlation value minus the background
 cross-correlation value, divided by the phantom-peak cross-correlation value
-minus the background cross-correlation value. **The minimum possible value is 0
-(no signal), highly enriched experiments have values greater than 1, and values
-much less than 1 may indicate low quality.** RSC values significantly low (<
-0.8) tend to have low signal to noise and can be due to failed and poor quality
-ChIP, low read sequence quality and hence lots of mismappings, shallow
-sequencing depth or a combination of these. Like the NSC, datasets with few
-binding sites (< 200) which are biologically justifiable also show low RSC
-scores.
+minus the background cross-correlation value.
+
+**The minimum possible value is 0 (no signal), highly enriched experiments have
+values greater than 1, and values much less than 1 may indicate low quality.**
+
+RSC values significantly low (< 0.8) tend to have low signal to noise and can be
+due to failed and poor quality ChIP, low read sequence quality and hence lots of
+mismappings, shallow sequencing depth or a combination of these. Like the NSC,
+datasets with few binding sites (< 200) which are biologically justifiable also
+show low RSC scores.
 
 ## `phantompeakqualtools`
 
