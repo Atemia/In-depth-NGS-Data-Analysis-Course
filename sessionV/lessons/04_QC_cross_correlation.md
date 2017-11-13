@@ -1,86 +1,59 @@
 ---
 title: "ChIP-Seq Quality Assessment: Cross-correlation"
 authors: "Mary Piper and Meeta Mistry"
-date: "November 7, 2017"
-output: 
-  revealjs::revealjs_presentation:
-    theme: solarized
-    highlight: pygments
-    transition: slide
-    self_contained: true
-    slide_level: 1
-    css: styles.css
-    reveal_options:
-      slideNumber: true
+date: "June 28th, 2017"
 ---
 
-# Learning Objectives
+Approximate time: 1.5 hours
 
-Approximate time: 90 min
+## Learning Objectives
 
 * Discussing sources of low quality ChIP-seq data
 * Understanding strand cross-correlation
 * Using `phantompeakqualtools` to compute cross-correlation and associated QC metrics
 * Evaluating the cross-correlation plot
 
-# ChIP-Seq quality assessment
+## ChIP-Seq quality assessment
 
 Prior to performing any downstream analyses with the results from a peak caller, it is best practice to assess the quality of your ChIP-Seq data. What we are looking for is good	quality	ChIP-seq enrichment over background.
 
-<center><img src="../img/chip_workflow_june2017_step3.png" width=700></center>
+<img src="../img/chip_workflow_june2017_step3.png" width=700>
 
-# Strand cross-correlation
+## Strand cross-correlation
 
-A very useful ChIP-seq quality metric that is independent of peak calling is strand cross-correlation. 
-
-It is based on the fact that a high-quality ChIP-seq experiment will produce significant clustering of enriched DNA sequence tags at locations bound by the protein of interest, that present as a bimodal enrichment of reads on the forward and reverse strands.
-
----
+A very useful ChIP-seq quality metric that is independent of peak calling is strand cross-correlation. It is based on the fact that a high-quality ChIP-seq experiment will produce significant clustering of enriched DNA sequence tags at locations bound by the protein of interest, that present as a bimodal enrichment of reads on the forward and reverse strands.
 
 The bimodal enrichment of reads is due to the following:
 
-* During the ChIP-seq experiment, the DNA is fragmented and the protein-bound fragments are immunoprecipitated. This generates DNA fragments containing the protein-bound region. 
-* The + strand of DNA is sequenced from the 5' end, generating the red reads in the figure below, and the - strand of DNA is sequenced from the 5' end, generating the blue reads in the figure below. 
+During the ChIP-seq experiment, the DNA is fragmented and the protein-bound fragments are immunoprecipitated. This generates DNA fragments containing the protein-bound region. 
 
-<center><img src="../img/chip-fragments.png" width =300></center>
+The + strand of DNA is sequenced from the 5' end, generating the red reads in the figure below, and the - strand of DNA is sequenced from the 5' end, generating the blue reads in the figure below. 
+
+<img src="../img/chip-fragments.png" width =300>
 
 *Nat Biotechnol. 2008 Dec; 26(12): 1351–1359*
 
----
+Due to the sequencing of the 5' ends of the fragments, this results in an enrichment of reads from the + strand (blue in the image below) being slightly offset from the enrichment of reads from the - strand (red in the image below). We need to **determine the number of bases to shift the peaks to yield maximum correlation between the two peaks**, which **should** correspond to the predominant **fragment length**. We can calculate the shift yielding the maximum correlation using the **cross-correlation metric**.
 
-Due to the sequencing of the 5' ends of the fragments, this results in an enrichment of reads from the + strand (blue in the image below) being slightly offset from the enrichment of reads from the - strand (red in the image below). 
+<img src="../img/model_shift.png" width =300>
 
-<center><img src="../img/model_shift.png" width =300></center>
+### Cross-correlation metric
 
-We need to **determine the number of bases to shift the peaks to yield maximum correlation between the two peaks**, which **should** correspond to the predominant **fragment length**. We can calculate the shift yielding the maximum correlation using the **cross-correlation metric**.
-
-# Cross-correlation metric
-
-The cross-correlation metric is computed as the **Pearson's linear correlation between the Crick strand and the Watson strand, after shifting Watson by k base pairs.** Using a small genomic window as an example, let's walk through the details of the cross-correlation.
-
----
+The cross-correlation metric is computed as the **Pearson's linear correlation between the Crick strand and the Watson strand, after shifting Watson by k base pairs.** Using a small genomic window as an example, let's walk through the details of the cross-correlation below.
 
 **At strand shift of zero, the Pearson correlation between the two vectors is 0.539.**
 
 <img src="../img/cross-corr-1.png" width =500>
 
----
-
 **At strand shift of 5bp, the Pearson correlation between the two vectors is 0.931**
 
 <img src="../img/cross-corr-2.png" width =500>
-
----
 
 **Keep shifting the vectors and for each strand shift compute a correlation value.** 
 
 <img src="../img/cross-corr-3.png" width =500>
 
----
-
 In the end, we will have a table of values mapping each base pair shift to a Pearson correlation value. This is computed for every peak for each chromosome and values are multiplied by a scaling factor and then summed across all chromosomes. We can then **plot cross-correlation values (y-axis) against the shift value (x-axis)** to generate a cross-correlation plot.
-
----
 
 The cross-correlation plot **typically produces two peaks**: a peak of enrichment corresponding to the predominant **fragment length** (highest correlation value) and a peak corresponding to the **read length** (“phantom” peak).
 
@@ -88,7 +61,6 @@ High-quality ChIP-seq data sets tend to have a larger fragment-length peak compa
 
 <img src="../img/ctcf.png" width=300> 
 
----
 
 An example of **weaker signal** is demonstrated below with a **Pol2** data. Here, this particular antibody is not very efficient and these are broad scattered peaks. We observe two peaks in the cross-correlation profile: one at the true peak shift (~185-200 bp) and the other at read length. For weak signal datasets, the **read-length peak will start to dominate**.
 
@@ -99,23 +71,28 @@ A failed experiment will resemble a cross-correlation plot using **input only**,
 
 <img src="../img/input.png" width=300> 
 
-# Cross-correlation quality metrics
+
+
+### Cross-correlation quality metrics
 
 Using the cross-correlation plot we can **compute metrics for assessing signal-to-noise ratios in a ChIP-seq experiment** and to ensure the fragment length is accurate based on the experimental design. Poor signal-to-noise and inaccurate fragment lengths can indicate problems with the ChIP-Seq data. These metrics are described in more detail below:
 
-# Normalized strand cross-correlation coefficent (NSC):
+#### Normalized strand cross-correlation coefficent (NSC):
 
 The ratio of the maximal cross-correlation value divided by the background cross-correlation (minimum cross-correlation value over all possible strand shifts). **Higher values indicate more enrichment, values less than 1.1 are relatively low NSC scores, and the minimum possible value is 1 (no enrichment).** Datasets with NSC values much less than 1.05 tend to have low signal to noise or few peaks (this could be biological, such as a factor that truly binds only a few sites in a particular tissue type or it could be due to poor quality).
 
-# Relative strand cross-correlation coefficient (RSC):
+#### Relative strand cross-correlation coefficient (RSC):
 
 The ratio of the fragment-length cross-correlation value minus the background cross-correlation value, divided by the phantom-peak cross-correlation value minus the background cross-correlation value. **The minimum possible value is 0 (no signal), highly enriched experiments have values greater than 1, and values much less than 1 may indicate low quality.** RSC values significantly low (< 0.8) tend to have low signal to noise and can be due to failed and poor quality ChIP, low read sequence quality and hence lots of mismappings, shallow sequencing depth or a combination of these. Like the NSC, datasets with few binding sites (< 200) which are biologically justifiable also show low RSC scores.
 
-# `phantompeakqualtools` 
+
+
+
+## `phantompeakqualtools` 
 
 The [`phantompeakqualtools`](https://code.google.com/archive/p/phantompeakqualtools/) package is a tool used to compute enrichment and quality measures for ChIP-Seq data [[1](http://www.g3journal.org/content/4/2/209.full)]. We will be using the package to compute the predominant insert-size (fragment length) based on strand cross-correlation peak and data quality measures based on relative phantom peak.
 
-# Set up
+### Set up
 
 The `phantompeakqualtools` package is written as an R script, that uses `samtools` as a dependency. The package has various options that need to be specified when running from the command line. To get set up, we will need to start an interactive session, load the necessary modules and set up the directory structure:
 
@@ -131,7 +108,7 @@ $ mkdir chip_qc
 $ cd chip_qc
 ```
 
-# Downloading `phantompeakqualtools`
+### Downloading `phantompeakqualtools`
 
 To use this `phantompeakqualtools` package, we need to download it from the project website. On the [project website](https://code.google.com/archive/p/phantompeakqualtools/), click on the *Downloads* option on the left-hand side of the page. The *Downloads* page has all updates for the package, with the most recent being from 2013. 
 
@@ -260,6 +237,8 @@ The qual files are tab-delimited with the columns containing the following infor
 > **NOTE:** The most important metrics we are interested in are the values in columns 9 through 11, however these numbers are computed from values in the other columns.
 
 **How do the values compare to the thresholds mentioned above?** All samples have quite high NSC values indicating more enrichment, a good signal to noise and a fair number of peaks. Nanog-rep2 has a comparably higher NSC value which might explain the increased number of peaks for that sample compared to the others. The RSC and quality tags further indicate good chip signal and a quality IP, yielding a very high quality tag. Based on these metrics, the samples look good for further analysis.
+
+
 
 ### Cross-correlation plots
 
