@@ -115,7 +115,6 @@ Your Rstudio interface should look something like the screenshot below:
 
 <img src="../img/rstudio-screenshot.png">
 
-
 > **NOTE:** This next section assumes you have the `ChIPQC` package
 > (vChIPQC_1.10.3 or higher) installed for R 3.3.3. If you haven't done this
 > please run the following lines of code before proceeding.
@@ -127,27 +126,42 @@ biocLite("ChIPQC")
 
 ### Getting data
 
-Now let's move over the appropriate files from Orchestra to our laptop. You can
-do this using `FileZilla` or the `scp` command.
+Now let's move over the appropriate files from Biocluster to our laptop. You can
+do this using `Cyberduck`, `MobaXTerm`, or the `scp` command.
 
-1. Move over the **BAM files (`chr12_aln.bam`)** and the corresponding **indices
-(`chr12_aln.bam.bai`)** from `~/ngs_course/chipseq/results/bowtie2` to your
-laptop. You will want to copy these files into your chipseq-project **into the
-`data/bams` folder.**
+1. First, we need to log into the cluster very quickly to copy over some data we didn't
+generate in the last round
+
+```
+$ cd ~/ngs_course/chipsep/results/
+
+$ cp /home/classroom/hpcbio/bowtie2/*.bam* bowtie2/
+```
+
+1. We need to copy over some pre-made BAM index files to our work directory on
+the cluster. First, log in (do you remember how?).  Then
+
+```
+$ cd ~/ngs_course/chipseq/results/bowtie2
+
+$ cp /home/classroom/hpcbio/chip-seq/bowtie2/H1hesc_* .
+```
+
+2. Now, on your desktop, move over the **BAM files (`chr12_aln.bam`)** and the
+corresponding **indices (`chr12_aln.bam.bai`)** from
+`~/ngs_course/chipseq/results/bowtie2` to your laptop. You will want to copy
+these files into your chipseq-project **into the `data/bams` folder.**
 
 > *NOTE*: Do not copy over the input file that we initially ran QC and alignment
 > on (i.e `H1hesc_Input_Rep1_chr12_aln_sorted.bam`). Only the files you had
 > copied over to your home directory is what you need.
 
-
 2. Move over the **narrowPeak files (`.narrowPeak`)**
 `~/ngs_course/chipseq/results/macs2` to your laptop. You will want to copy these
 files into your chipseq-project **into the `data/peakcalls` folder.**
 
-3. Download the sample data sheet available from [this
-link](https://github.com/hbctraining/In-depth-NGS-Data-Analysis-Course/raw/may2017/sessionV/samplesheet_chr12.csv).
+3. Download the sample data sheet available from [this link](https://raw.githubusercontent.com/HPCBio/In-depth-NGS-Data-Analysis-Course/HPCBio-Fall2017/sessionV/samplesheet_chr12.csv).
 Move the samplesheet into the `meta` folder.
-
 
 ### Running `ChIPQC`
 
@@ -351,8 +365,7 @@ PCR amplification is recommended because bias increases with every PCR cycle.**
 > a suite of python tools developed for the efficient analysis of
 > high-throughput sequencing data, such as ChIP-seq, RNA-seq or MNase-seq. If
 > you are interested in learning more we have a [lesson on quality assessment
-> using
-> deepTools](https://github.com/hbctraining/In-depth-NGS-Data-Analysis-Course/blob/may2017/sessionV/lessons/qc_deeptools.md).
+> using [deepTools](https://github.com/HPCBio/In-depth-NGS-Data-Analysis-Course/blob/may2017/sessionV/lessons/qc_deeptools.md).
 
 ***
 *This lesson has been developed by members of the teaching team at the [Harvard
