@@ -156,7 +156,7 @@ show low RSC scores.
 ## `phantompeakqualtools`
 
 The
-[`phantompeakqualtools`](https://code.google.com/archive/p/phantompeakqualtools/)
+[`phantompeakqualtools`](https://github.com/kundajelab/phantompeakqualtools)
 package is a tool used to compute enrichment and quality measures for ChIP-Seq
 data [[1](http://www.g3journal.org/content/4/2/209.full)]. We will be using the
 package to compute the predominant insert-size (fragment length) based on strand
@@ -172,8 +172,15 @@ directory structure:
 
 ```
 $ bsub -Is -n 2 -q interactive bash
+```
 
-$ module load stats/R/3.2.1 seq/samtools/1.2
+We're going to load in a custom module I made to run this tool, which requires some
+trickery:
+
+```
+$ export MODULEPATH=/home/classroom/hpcbio/chip-seq/modules:$MODULEPATH
+
+$ module load phantompeakqualtools/1.2
 
 $ cd ~/ngs_course/chipseq/results
 
