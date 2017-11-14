@@ -24,15 +24,23 @@ Approximate time: 90 min
 * Generating gene annotations for peak calls and evaluating overall distributions across dataset
 * Functional enrichment of gene annotations obtained from peak calls
 
-
-
 # ChIPseeker
 
-Now that we have a set of high confidence peaks for our samples, the next step is to **annotate our peaks to identify relative location relationship information between query peaks and genes/genomic features** to obtain some biological context. 
+Now that we have a set of high confidence peaks for our samples, the next step
+is to **annotate our peaks to identify relative location relationship
+information between query peaks and genes/genomic features** to obtain some
+biological context. 
 
 <img src="../img/chip_workflow_june2017_step5.png" width="700">
 
-[ChIPseeker](http://bioconductor.org/packages/release/bioc/vignettes/ChIPseeker/inst/doc/ChIPseeker.html) is an R package for annotating ChIP-seq data analysis. It supports annotating ChIP peaks and provides functions to visualize ChIP peaks coverage over chromosomes and profiles of peaks binding to TSS regions. Comparison of ChIP peak profiles and annotation are also supported, and can be useful to estimate how well biological replications are. Several visualization functions are implemented to visualize the peak annotation and statistical tools for enrichment analyses of functional annotations.
+[ChIPseeker](http://bioconductor.org/packages/release/bioc/vignettes/ChIPseeker/inst/doc/ChIPseeker.html)
+is an R package for annotating ChIP-seq data analysis. It supports annotating
+ChIP peaks and provides functions to visualize ChIP peaks coverage over
+chromosomes and profiles of peaks binding to TSS regions. Comparison of ChIP
+peak profiles and annotation are also supported, and can be useful to estimate
+how well biological replications are. Several visualization functions are
+implemented to visualize the peak annotation and statistical tools for
+enrichment analyses of functional annotations.
 
 
 ## Setting up 
@@ -40,7 +48,10 @@ Now that we have a set of high confidence peaks for our samples, the next step i
 1. Open up RStudio and open up the `chipseq-project` that we created previously.
 2. Open up a new R script ('File' -> 'New File' -> 'Rscript'), and save it as `chipseeker.R`
 
-> **NOTE:** This next section assumes you have the `ChIPseeker` package installed for R 3.3.3. You will also need one additional library for gene annotation. If you haven't done this please run the following lines of code before proceeding.
+> **NOTE:** This next section assumes you have the `ChIPseeker` package
+> installed for R 3.3.3. You will also need one additional library for gene
+> annotation. If you haven't done this please run the following lines of code
+> before proceeding.
 >
 ```
 source("http://bioconductor.org/biocLite.R")
@@ -50,14 +61,24 @@ biocLite("TxDb.Hsapiens.UCSC.hg19.knownGene")
 
 ## Getting data 
 
-As mentioned previously, these donwstream steps should be performed on your high confidence peak calls. While we have a set for our subsetted data, this set is rather small and will not result in anything meaningful in our functional analyses. **We have generated a set of high confidence peak calls using the full dataset.** These were obtained post-IDR analysis, (i.e. concordant peaks between replicates) and are provided in BED format which is optimal input for the ChIPseeker package. 
+As mentioned previously, these downstream steps should be performed on your high
+confidence peak calls. While we have a set for our subsetted data, this set is
+rather small and will not result in anything meaningful in our functional
+analyses. **We have generated a set of high confidence peak calls using the full
+dataset.** These were obtained post-IDR analysis, (i.e. concordant peaks between
+replicates) and are provided in BED format which is optimal input for the
+ChIPseeker package. 
 
-> **NOTE:** the number of peaks in these BED files are are significantly higher than what we observed with the subsetted data replicate analysis.
+> **NOTE:** the number of peaks in these BED files are are significantly higher
+> than what we observed with the subsetted data replicate analysis.
 
-We will need to copy over the appropriate files from Orchestra to our laptop. You can do this using `FileZilla` or the `scp` command.
+We will need to copy over the appropriate files from Orchestra to our laptop.
+You can do this using `FileZilla` or the `scp` command.
 
-Move over the **BED files from Orchestra(`/groups/hbctraining/chip-seq/full-dataset/idr/*.bed`) to your laptop**. You will want to copy these files into your chipseq-project **into a new folder called `data/idr-bed`.**
-
+Move over the **BED files from
+Orchestra(`/groups/hbctraining/chip-seq/full-dataset/idr/*.bed`) to your
+laptop**. You will want to copy these files into your chipseq-project **into a
+new folder called `data/idr-bed`.**
 
 Let's start by loading the libraries:
 
@@ -83,11 +104,20 @@ We need to **assign annotation databases** generated from UCSC to a variable:
 
 	txdb <- TxDb.Hsapiens.UCSC.hg19.knownGene
 	
-> **NOTE:** *ChIPseeker supports annotating ChIP-seq data of a wide variety of species if they have transcript annotation TxDb object available.* To find out which genomes have the annotation available follow [this link](http://bioconductor.org/packages/3.5/data/annotation/) and scroll down to "TxDb". Also, if you are interested in creating your own TxDb object you will find [more information here](https://bioconductor.org/packages/devel/bioc/vignettes/GenomicFeatures/inst/doc/GenomicFeatures.pdf). 
+> **NOTE:** *ChIPseeker supports annotating ChIP-seq data of a wide variety of
+> species if they have transcript annotation TxDb object available.* To find out
+> which genomes have the annotation available follow [this
+> link](http://bioconductor.org/packages/3.5/data/annotation/) and scroll down
+> to "TxDb". Also, if you are interested in creating your own TxDb object you
+> will find [more information
+> here](https://bioconductor.org/packages/devel/bioc/vignettes/GenomicFeatures/inst/doc/GenomicFeatures.pdf). 
 
 ### Visualization
 
-First, let's take a look at peak locations across the genome. The `covplot` function calculates **coverage of peak regions** across the genome and generates a figure to visualize this across chromosomes. We do this for the Nanog peaks and find a considerable number of peaks on all chromosomes.
+First, let's take a look at peak locations across the genome. The `covplot`
+function calculates **coverage of peak regions** across the genome and generates
+a figure to visualize this across chromosomes. We do this for the Nanog peaks
+and find a considerable number of peaks on all chromosomes.
 
 ```
 # Assign peak data to variables
@@ -102,7 +132,11 @@ covplot(nanog, weightCol="V5")
 <img src="../img/covplot.png">
 
 
-Using a window of +/- 1000bp around the TSS of genes we can plot the **density of read count frequency to see where binding is relative to the TSS** or each sample. This is similar to the plot in the ChIPQC report but with the flexibility to customize the plot a bit. We will plot both Nanog and Pou5f1 together to compare the two.
+Using a window of +/- 1000bp around the TSS of genes we can plot the **density
+of read count frequency to see where binding is relative to the TSS** or each
+sample. This is similar to the plot in the ChIPQC report but with the
+flexibility to customize the plot a bit. We will plot both Nanog and Pou5f1
+together to compare the two.
 
 ```
 # Prepare the promotor regions
@@ -116,7 +150,11 @@ plotAvgProf(tagMatrixList, xlim=c(-1000, 1000), conf=0.95,resample=500, facet="r
 ```
 <img src="../img/density_profileplots.png">
 
-With these plots the confidence interval is estimated by bootstrap method (500 iterations) and is shown in the grey shading that follows each curve. The Nanog peaks exhibit a nice narrow peak at the TSS with small confidence intervals. Whereas the Pou5f1 peaks display a bit wider peak suggesting binding around the TSS with larger confidence intervals.
+With these plots the confidence interval is estimated by bootstrap method (500
+iterations) and is shown in the grey shading that follows each curve. The Nanog
+peaks exhibit a nice narrow peak at the TSS with small confidence intervals.
+Whereas the Pou5f1 peaks display a bit wider peak suggesting binding around the
+TSS with larger confidence intervals.
 
 The **heatmap is another method of visualizing the read count frequency** relative to the TSS.
 
@@ -127,11 +165,22 @@ The **heatmap is another method of visualizing the read count frequency** relati
 
 ## Annotation
 
-ChIPseeker implements the `annotatePeak` function for annotating peaks with nearest gene and genomic region where the peak is located. Many annotation tools calculate the distance of a peak to the nearest TSS and annotates the peak to that gene. This can be misleading as **binding sites might be located between two start sites of different genes**.
+ChIPseeker implements the `annotatePeak` function for annotating peaks with
+nearest gene and genomic region where the peak is located. Many annotation tools
+calculate the distance of a peak to the nearest TSS and annotates the peak to
+that gene. This can be misleading as **binding sites might be located between
+two start sites of different genes**.
 
 <img src="../img/annotate-genes.png" width=800>
 
-The **`annotatePeak` function by default uses the TSS method, and provides parameters to specify a max distance cutoff.** There is also an option to report ALL genes within this distance regardless of whether there is overlap with TSS or not. For annotating genomic regions, annotatePeak function reports detail information when genomic region is Exon or Intron. For instance, ‘Exon (uc002sbe.3/9736, exon 69 of 80)’, means that the peak overlaps with the 69th exon of the 80 exons that transcript uc002sbe.3 possess and the corresponding Entrez gene ID is 9736. 
+The **`annotatePeak` function by default uses the TSS method, and provides
+parameters to specify a max distance cutoff.** There is also an option to report
+ALL genes within this distance regardless of whether there is overlap with TSS
+or not. For annotating genomic regions, annotatePeak function reports detail
+information when genomic region is Exon or Intron. For instance, ‘Exon
+(uc002sbe.3/9736, exon 69 of 80)’, means that the peak overlaps with the 69th
+exon of the 80 exons that transcript uc002sbe.3 possess and the corresponding
+Entrez gene ID is 9736. 
 
 
 Let's start by retrieving annotations for our Nanog and Pou5f1 peaks calls:
@@ -176,7 +225,9 @@ Genomic Annotation Summary:
 5  Distal Intergenic 52.6526835
 ```
 
-To visualize this annotation data ChIPseeker provides several functions. We will demonstrate a few using the Nanog sample only. We will also show how some of the functions can also support comparing across samples.
+To visualize this annotation data ChIPseeker provides several functions. We will
+demonstrate a few using the Nanog sample only. We will also show how some of the
+functions can also support comparing across samples.
 
 ### Pie chart of genomic region annotation
 
@@ -216,11 +267,18 @@ plotDistToTSS(peakAnnoList, title="Distribution of transcription factor-binding 
 
 ### Writing annotations to file 
 
-It would be nice to have the annotations for each peak call written to file, as it can be useful to browse the data and subset calls of interest. The **annotation information** is stored in the `peakAnnoList` object. To retrieve it we use the following syntax:
+It would be nice to have the annotations for each peak call written to file, as
+it can be useful to browse the data and subset calls of interest. The
+**annotation information** is stored in the `peakAnnoList` object. To retrieve
+it we use the following syntax:
 
 	nanog_annot <- as.data.frame(peakAnnoList[["Nanog"]]@anno)
 
-Take a look at this dataframe. You should see columns corresponding to your input BED file and addditional columns containing nearest gene(s), the distance from peak to the TSS of its nearest gene, genomic region of the peak and other information. Since some annotation may overlap, ChIPseeker has adopted the following priority in genomic annotation.
+Take a look at this dataframe. You should see columns corresponding to your
+input BED file and addditional columns containing nearest gene(s), the distance
+from peak to the TSS of its nearest gene, genomic region of the peak and other
+information. Since some annotation may overlap, ChIPseeker has adopted the
+following priority in genomic annotation.
 
 * Promoter
 * 5’ UTR
