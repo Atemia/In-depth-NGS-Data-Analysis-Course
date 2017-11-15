@@ -77,7 +77,7 @@ Let's start an interactive session and change directories and set up a space for
 the resulting overlaps.
 
 ```bash
-$ bsub -Is -q interactive bash
+$ srun -n 2 --mem 2000 -p classroom --pty bash
 
 $ cd ~/ngs_course/chipseq/results/
 
@@ -87,9 +87,9 @@ $ mkdir bedtools
 Load the modules for `bedtools` and `samtools`:
 
 ```bash
-$ module load seq/BEDtools/2.26.0
+$ module load BEDTools/2.26.0-IGB-gcc-4.9.4
 
-$ module load seq/samtools/1.3
+$ module load SAMtools/1.5-IGB-gcc-4.9.4
 ```
 
 ### Finding overlapping peaks between replicates
@@ -149,9 +149,9 @@ represent a higher proportion of overlap with respect to each replicate.
 
 ## Irreproducibility Discovery Rate (IDR)
 
-[IDR](https://sites.google.com/site/anshulkundaje/projects/idr) is a framework
-developed by Qunhua Li and Peter Bickel's group that **compares a pair of ranked
-lists of regions/peaks and assigns values that reflect its reproducibility.**
+[IDR](https://github.com/kundajelab/idr) is a framework developed by Qunhua Li
+and Peter Bickel's group that **compares a pair of ranked lists of regions/peaks
+and assigns values that reflect its reproducibility.**
 
 <img src=../img/idr_figure.png>
 
@@ -245,12 +245,14 @@ sort -k8,8nr NAME_OF_INPUT_peaks.narrowPeak > macs/NAME_FOR_OUPUT_peaks.narrowPe
 
 ### Setting up
 
-IDR is an open source tool available on [GitHub](https://github.com/nboley/idr).
+IDR is an open source tool available on [GitHub](https://github.com/kundajelab/idr).
 It is a Python program that has already been installed on Orchestra. The first
 thing we need to do is load the module to run IDR:
 
 ```bash
-$  module load seq/idr/2.0.2
+$ export MODULEPATH=/home/classroom/hpcbio/chip-seq/modules:$MODULEPATH
+
+$ module load idr/2.0.4
 ```
 
 > *NOTE:* After loading the module, if your run the command `module list` you
@@ -267,7 +269,7 @@ $ mkdir IDR
 Copy over the sorted narrowPeak files for each replicate for Nanog and Pou5f1:
 
 ```bash
-$ cp /groups/hbctraining/ngs-data-analysis-longcourse/chipseq/idr/macs/*sorted* IDR/
+$ cp /home/classroom/hpcbio/chip-seq/idr/macs2/*sorted_peaks* IDR/
 ```
 
 ### Peak consistency between true replicates
@@ -299,7 +301,7 @@ $ cd IDR
 Let's start with the Nanog replicates:
 
 ```bash
-$ idr --samples Nanog_Rep1_sorted_peaks.narrowPeak Nanog_Rep2_sorted_peaks.narrowPeak \
+$ idr --samples Nanog-rep1_sorted_peaks.narrowPeak Nanog-rep2_sorted_peaks.narrowPeak \
 --input-file-type narrowPeak \
 --rank p.value \
 --output-file Nanog-idr \
@@ -310,7 +312,7 @@ $ idr --samples Nanog_Rep1_sorted_peaks.narrowPeak Nanog_Rep2_sorted_peaks.narro
 And now with the Pou5f1 replicates:
 
 ```bash
-$ idr --samples Pou5f1_Rep1_sorted_peaks.narrowPeak Pou5f1_Rep2_sorted_peaks.narrowPeak \
+$ idr --samples Pou5f1-rep1_sorted_peaks.narrowPeak Pou5f1-rep2_sorted_peaks.narrowPeak \
 --input-file-type narrowPeak \
 --rank p.value \
 --output-file Pou5f1-idr \
@@ -324,8 +326,15 @@ The output file format mimics the input file type, with some additional fields.
 Note that the **first 10 columns are a standard narrowPeak file**, pertaining to
 the merged peak across the two replicates.
 
-**Column 5 contains the scaled IDR value, `min(int(log2(-125IDR), 1000)`** For example, peaks with an IDR of 0 have a score of 1000, peaks with an IDR of 0.05 have a score of int(-125log2(0.05)) = 540, and IDR of 1.0 has a score of 0. **Columns 11 and 12 correspond to the local and global IDR value, respectively.** The global IDR is the value used to calculate the scaled IDR number in column 5, it _is analogous to a multiple hypothesis correction on a p-value to compute an FDR_. The local IDR is akin to the posterior probability of a peak belonging to the irreproducible noise component. You can read [this paper](http://projecteuclid.org/euclid.aoas/1318514284
-) for more details.
+**Column 5 contains the scaled IDR value, `min(int(log2(-125IDR), 1000)`** For
+example, peaks with an IDR of 0 have a score of 1000, peaks with an IDR of 0.05
+have a score of int(-125log2(0.05)) = 540, and IDR of 1.0 has a score of 0.
+**Columns 11 and 12 correspond to the local and global IDR value,
+respectively.** The global IDR is the value used to calculate the scaled IDR
+number in column 5, it _is analogous to a multiple hypothesis correction on a
+p-value to compute an FDR_. The local IDR is akin to the posterior probability
+of a peak belonging to the irreproducible noise component. You can read [this
+paper](http://projecteuclid.org/euclid.aoas/1318514284) for more details.
 
 The next four columns correspond to Replicate 1 peak data and the following four
 columns with Replicate 2 peak data.
@@ -334,7 +343,6 @@ More detail on the output can be [found in the user
 manual](https://github.com/nboley/idr#output-file-format). Also, if you have any
 unanswered questions check out posts in the [Google groups
 forum](https://groups.google.com/forum/#!forum/idr-discuss).
-
 
 Let's take a look at our output files. _How many common peaks are considered for
 each TF?_
