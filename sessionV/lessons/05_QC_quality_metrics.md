@@ -313,7 +313,7 @@ while there are many peaks identified it is mainly due to noise.
 
 ## Experimental biases: sources of low quality ChIP-seq data
 
-Once you have identified low quality samples, th next logical step is to
+Once you have identified low quality samples, the next logical step is to
 troubleshoot what might be causing it.
 
 * **Strength/efficiency and specificity of the immunoprecipitation**
