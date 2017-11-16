@@ -208,8 +208,7 @@ $ Rscript run_spp.R -c=<tagAlign/BAMfile> -savp -out=<outFile>
 >performing peak calling with SPP.
 
 From within the `phantompeakqualtools` directory, we will create output
-directories and use a 'for loop' to **run the script on every Nanog and Pouf51
-BAM file**:
+directories and use a 'for loop' to **run the script on every BAM file**:
 
 ```
 $ mkdir -p logs qual
