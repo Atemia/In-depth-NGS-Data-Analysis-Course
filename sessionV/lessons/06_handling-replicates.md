@@ -43,7 +43,6 @@ both methods.
 > where they talk about handling replicates and the similarities and differences
 > when using an overlap versus IDR analysis.**
 
-
 ## Overlapping peaks
 
 In this section, our goal is to determine what peaks are in common between the
@@ -339,10 +338,8 @@ paper](http://projecteuclid.org/euclid.aoas/1318514284) for more details.
 The next four columns correspond to Replicate 1 peak data and the following four
 columns with Replicate 2 peak data.
 
-More detail on the output can be [found in the user
-manual](https://github.com/nboley/idr#output-file-format). Also, if you have any
-unanswered questions check out posts in the [Google groups
-forum](https://groups.google.com/forum/#!forum/idr-discuss).
+More detail on the output can be [found in the user manual](https://github.com/kundajelab/idr#output-file-format).
+Also, if you have any unanswered questions check out posts in the [Google groups forum](https://groups.google.com/forum/#!forum/idr-discuss).
 
 Let's take a look at our output files. _How many common peaks are considered for
 each TF?_
