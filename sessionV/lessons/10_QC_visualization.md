@@ -1,7 +1,7 @@
 ---
 title: "QC visualization of peaks with IGV"
 author: "Meeta Mistry"
-date: "Thursday July 29th, 2017"
+date: "November 15, 2017"
 ---
 
 Approximate time: 45 minutes
@@ -37,26 +37,38 @@ Approximate time: 45 minutes
 > -[https://genome.ucsc.edu/goldenpath/help/bigWig.html](https://genome.ucsc.edu/goldenpath/help/bigWig.html)
 
 ```bash
-cd ~/ngs_course/chipseq/results/
-mkdir visualization
+$ cd ~/ngs_course/chipseq/results/
+
+$ mkdir visualization
 ```
 
 ```bash
-module load seq/deeptools/2.4.0
-bamCompare -h
+$ module load module load deepTools/2.5.3-IGB-gcc-4.9.4-Python-2.7.13
+
+$ bamCompare -h
 ```
 
 ```bash
-bamCompare -b1 bowtie2/H1hesc_Nanog_Rep1_chr12_aln.bam -b2 bowtie2/H1hesc_Input_Rep1_chr12_aln.bam -o visualization/Nanog_Rep1_chr12.bw 2> visualization/Nanog_Rep1_bamcompare.log
-bamCompare -b1 bowtie2/H1hesc_Nanog_Rep2_chr12_aln.bam -b2 bowtie2/H1hesc_Input_Rep2_chr12_aln.bam -o visualization/Nanog_Rep2_chr12.bw 2> visualization/Nanog_Rep2_bamcompare.log
+$ bamCompare -b1 bowtie2/H1hesc_Nanog_Rep1_chr12_aln.bam \
+  -b2 bowtie2/H1hesc_Input_Rep1_chr12_aln.bam \
+  -o visualization/Nanog_Rep1_chr12.bw 2> visualization/Nanog_Rep1_bamcompare.log
+
+$ bamCompare -b1 bowtie2/H1hesc_Nanog_Rep2_chr12_aln.bam \
+  -b2 bowtie2/H1hesc_Input_Rep2_chr12_aln.bam \
+  -o visualization/Nanog_Rep2_chr12.bw 2> visualization/Nanog_Rep2_bamcompare.log
 ```
 
 ```bash
-bamCompare -b1 bowtie2/H1hesc_Pou5f1_Rep1_chr12_aln.bam -b2 bowtie2/H1hesc_Input_Rep1_chr12_aln.bam -o visualization/Pou5f1_Rep1_chr12.bw 2> visualization/Pou5f1_Rep1_bamcompare.log
-bamCompare -b1 bowtie2/H1hesc_Pou5f1_Rep2_chr12_aln.bam -b2 bowtie2/H1hesc_Input_Rep2_chr12_aln.bam -o visualization/Pou5f1_Rep2_chr12.bw 2> visualization/Pou5f1_Rep2_bamcompare.log
+$ bamCompare -b1 bowtie2/H1hesc_Pou5f1_Rep1_chr12_aln.bam \
+  -b2 bowtie2/H1hesc_Input_Rep1_chr12_aln.bam \
+  -o visualization/Pou5f1_Rep1_chr12.bw 2> visualization/Pou5f1_Rep1_bamcompare.log
+
+$ bamCompare -b1 bowtie2/H1hesc_Pou5f1_Rep2_chr12_aln.bam \
+  -b2 bowtie2/H1hesc_Input_Rep2_chr12_aln.bam \
+  -o visualization/Pou5f1_Rep2_chr12.bw 2> visualization/Pou5f1_Rep2_bamcompare.log
 ```
 
-* Copy over the bigWig files to your laptop using filezilla or scp.
+* Copy over the bigWig files to your laptop using Cyberduck or MobaXTerm.
 * Copy over the BEDtools overlap/intersect files to your computer.
 
 * Start IGV and load the 2 rep1 files, and the overlap BED files. You will
@@ -66,12 +78,27 @@ bamCompare -b1 bowtie2/H1hesc_Pou5f1_Rep2_chr12_aln.bam -b2 bowtie2/H1hesc_Input
 > You can generate a simple, non-normalized bigWig with `bamCoverage` and you
 > won't see any negative values.
 
-* Now load the `Nanog_vs_Pou5f1_edgeR_sig.bed` and
-  `Nanog_vs_Pou5f1_deseq2_sig.bed` (output of DiffBind, in your chipseq R
-  project) into IGV.
+Here, we'll use a bash loop to run `bamCoverage` on all the original BAM files.
+
+```
+$ for BAM in bowtie2/*.bam; do \
+    NAME=`basename ${BAM%.bam}`
+    bamCoverage --bam $BAM --outFileFormat bigwig --ignoreDuplicates --outFileName visualization/$NAME.nn.bw 2> visualization/$NAME.bamCoverage.log
+  done
+```
+
+* Copy over the newly generated bigWig files to compare.  Note the input.
+
+* Copy over the BAM files in the bowtie2 folder (those ending with `*aln.bam`)
+  along with their `*.bai` index files, and open them in IGV.
 
 * Finally, we are going to visually compare our output to the output from the
   full dataset from ENCODE, by loading that data from the IGV server.
 
 ***
-*This lesson has been developed by members of the teaching team at the [Harvard Chan Bioinformatics Core (HBC)](http://bioinformatics.sph.harvard.edu/). These are open access materials distributed under the terms of the [Creative Commons Attribution license](https://creativecommons.org/licenses/by/4.0/) (CC BY 4.0), which permits unrestricted use, distribution, and reproduction in any medium, provided the original author and source are credited.*
+*This lesson has been developed by members of the teaching team at the [Harvard
+Chan Bioinformatics Core (HBC)](http://bioinformatics.sph.harvard.edu/). These
+are open access materials distributed under the terms of the [Creative Commons
+Attribution license](https://creativecommons.org/licenses/by/4.0/) (CC BY 4.0),
+which permits unrestricted use, distribution, and reproduction in any medium,
+provided the original author and source are credited.*
