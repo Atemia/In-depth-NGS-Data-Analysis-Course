@@ -247,7 +247,7 @@ You should see something like this:
 Now that we have the directory structure created, let's copy over the data to perform our quality control and alignment, including our FASTQ files and reference data files:
 
 ```bash
-$ cp /home/classroom/hpcbio/chip-seq/raw_data/*.fastq.gz raw_data/
+$ cp /home/classroom/hpcbio/chip-seq/raw_data/*.fastq raw_data/
 $ cp /home/classroom/hpcbio/chip-seq/reference/* reference_data/
 ```
 
