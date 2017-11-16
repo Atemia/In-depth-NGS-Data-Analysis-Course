@@ -1,3 +1,9 @@
+---
+title: "QC - deepTools"
+author: "Meeta Mistry"
+date: "November 12, 2017"
+---
+
 ## Quality assessment using `deepTools`
 
 Another way in which we can assess the quality of our samples is by
@@ -7,7 +13,7 @@ reads stack up is indicative of a weak ChIP-Seq experiment. In addition, we can
 identify outlier samples or batch effects.
 
 To evaluate read coverage we will be using the
-[`deepTools`](http://deeptools.readthedocs.org/en/latest/content/list_of_tools.html),
+[`deepTools`](http://deeptools.readthedocs.org/en/latest/content/list_of_tools.html) suite,
 a suite of python tools developed for the efficient analysis of high-throughput
 sequencing data, such as ChIP-seq, RNA-seq or MNase-seq. `deepTools` has a wide
 variety of tools that go beyond those that are covered in this lesson. We
@@ -41,7 +47,7 @@ $ ls -l ../../bowtie2/*.bai
 Let's load the module and we are ready to get started:
 
 ```
-$ module load seq/deeptools/2.2.0
+$ module load deepTools/2.5.3-IGB-gcc-4.9.4-Python-2.7.13
 ```
 
 ### Calculation of the read coverage scores using the `multiBamSummary` tool
@@ -56,7 +62,7 @@ images.
 
 ```
 $ multiBamSummary bins --ignoreDuplicates -p 6 \
---bamfiles ../../bowtie2/*aln.bam \
+--bamfiles ../bowtie2/*aln.bam \
 -out deeptools_multiBAM.out.npz \
 --outRawCounts readCounts.tab
 ```
@@ -121,7 +127,11 @@ We will use the tool `plotPCA` to sort the principal components according to the
 amount of variability of the data that they explain and generate two plots:
 
 - the PCA plot for the top two principal components eigenvalues
-- the Scree plot for the top five principal components where the bars represent the amount of variability explained by the individual factors and the red line traces the amount of variability is explained by the individual components in a cumulative manner [[1]](http://deeptools.readthedocs.org/en/latest/content/tools/plotPCA.html)
+- the Scree plot for the top five principal components where the bars represent
+  the amount of variability explained by the individual factors and the red line
+  traces the amount of variability is explained by the individual components in
+  a cumulative manner
+  [[1]](http://deeptools.readthedocs.org/en/latest/content/tools/plotPCA.html)
 
 ```
 $ plotPCA --corData deeptools_multiBAM.out.npz \
