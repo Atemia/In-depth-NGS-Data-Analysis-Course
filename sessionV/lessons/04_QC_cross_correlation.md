@@ -182,6 +182,14 @@ $ mkdir chip_qc
 $ cd chip_qc
 ```
 
+We need to copy in some data (namely BAM index files) that we generated for you:
+
+```
+$ cd ~/ngs_course/chipsep/results/
+
+$ cp /home/classroom/hpcbio/bowtie2/*.bam* ~/ngs_course/chipsep/results/bowtie2/
+```
+
 ### Running `phantompeakqualtools`
 
 To obtain quality measures based on cross-correlation plots, we will be running

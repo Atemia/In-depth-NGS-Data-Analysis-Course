@@ -143,16 +143,7 @@ $ cd ~/ngs_course/chipsep/results/
 $ cp /home/classroom/hpcbio/bowtie2/*.bam* bowtie2/
 ```
 
-1. We need to copy over some pre-made BAM index files to our work directory on
-the cluster. First, log in (do you remember how?).  Then
-
-```
-$ cd ~/ngs_course/chipseq/results/bowtie2
-
-$ cp /home/classroom/hpcbio/chip-seq/bowtie2/H1hesc_* .
-```
-
-2. Now, on your desktop, move over the **BAM files (`chr12_aln.bam`)** and the
+2. Now, on your desktop, move over the **BAM files (`*chr12_aln.bam`)** and the
 corresponding **indices (`chr12_aln.bam.bai`)** from
 `~/ngs_course/chipseq/results/bowtie2` to your laptop. You will want to copy
 these files into your chipseq-project **into the `data/bams` folder.**
@@ -226,9 +217,7 @@ If you were unable to run the code successfully you can take a look an example
 report found
 [here](https://u35207958.dl.dropboxusercontent.com/u/35207958/chipseq-devel/ChIPQCreport/ChIP%20QC%20report%3A%20Nanog%20and%20Pou5f1.html).
 
-
 ### `ChIPQC` report
-
 
 Since our report is based only on a small suubset of data, the figures will not
 be as meaningful. **Take a look at the report generated using the full dataset
