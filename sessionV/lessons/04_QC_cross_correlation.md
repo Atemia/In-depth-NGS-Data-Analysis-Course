@@ -1,7 +1,7 @@
 ---
 title: "ChIP-Seq Quality Assessment: Cross-correlation"
 authors: "Mary Piper and Meeta Mistry"
-date: "June 28th, 2017"
+date: "November 15, 2017"
 ---
 
 Approximate time: 1.5 hours
@@ -171,16 +171,9 @@ start an interactive session, load the necessary modules and set up the
 directory structure:
 
 ```
-$ bsub -Is -n 2 -q interactive bash
-```
+$ srun -n 2 --mem 2000 -p classroom --pty bash
 
-We're going to load in a custom module I made to run this tool, which requires some
-trickery:
-
-```
-$ export MODULEPATH=/home/classroom/hpcbio/chip-seq/modules:$MODULEPATH
-
-$ module load phantompeakqualtools/1.2
+$ module load Phantompeaktools/1.2-IGB-gcc-4.9.4-R-3.4.1
 
 $ cd ~/ngs_course/chipseq/results
 
@@ -188,94 +181,6 @@ $ mkdir chip_qc
 
 $ cd chip_qc
 ```
-
-### Downloading `phantompeakqualtools`
-
-To use this `phantompeakqualtools` package, we need to download it from the
-project website. On the [project
-website](https://code.google.com/archive/p/phantompeakqualtools/), click on the
-*Downloads* option on the left-hand side of the page. The *Downloads* page has
-all updates for the package, with the most recent being from 2013.
-
-Right-click on the link for the most recent update, and copy the link.
-
-Download the `phantompeakqualtools` to your directory using `wget`:
-
-```
-$ wget https://storage.googleapis.com/google-code-archive-downloads/v2/code.google.com/phantompeakqualtools/ccQualityControl.v.1.1.tar.gz
-
-$ ls
-```
-
-> **NOTE:** *You may be asked to choose a mirror. If so, just choose a location
-> nearest to where you are located (i.e. in the northeast). Some mirrors can be
-> slower than others for downloads depending on the server speed and distance to
-> the server.*
-
-You should see `ccQualityControl.v.1.1.tar.gz` appear in the folder. This is a
-compressed folder, to extract the contents we use the `tar -xzf` command:
-
-```
-$ tar -xzf ccQualityControl.v.1.1.tar.gz
-```
-The `tar` command offers a simple way to compress and uncompress entire
-directories. We are using the command to uncompress the
-`ccQualityControl.v.1.1.tar.gz` directory.
-
-The options included are:
-
-`-x`: extract a tar archive (or tarball) file
-
-`-z`: the file is a compressed gzip archive file
-
-`-f`: file name of archive file (needs to precede the file name)
-
-> **NOTE:** *To compress a directory, you would issue the same command, but replace -x with -c, which specifies to create a new tar archive (or tarball) file, and after the name of the tar file you would name the directory to be compressed*
-
-You should now see a `phantompeakqualtools` folder. Let's explore the contents a bit:
-
-```
-$ cd phantompeakqualtools
-
-$ ls -l
-```
-
-There should also be a `README.txt` which contains all the commands, options,
-and output descriptions. Let's check out the `README.txt`:
-
-```
-$ less README.txt
-```
-
-Note that there are two R scripts that are described in the README file. Both
-will compute the fragment length, and data quality characteristics based on
-cross-correlation analysis, but one is for use in situations where the
-duplicates have been removed (`run_spp_nodups.R`). This is the script we will be
-using.
-
-### Installing R libraries
-
-In the README you will have noticed an *INSTALLATION* section. We will need to
-install the R package, `caTools`, into our personal R library to run the script.
-To do this, first open up R:
-
-```
-$ R
-```
-
-Use the install.packages() function to install `caTools`:
-
-```
-> install.packages("caTools", lib="~/R/library")
-
-# Choose a mirror near to your location (i.e. northeast). I chose the PA 1 mirror, which is number 117.
-
-> quit()
-
-```
-
-> **NOTE:** We do not need to install `spp` because the R module we have loaded
-> has the package pre-installed.
 
 ### Running `phantompeakqualtools`
 
@@ -309,10 +214,10 @@ BAM file**:
 ```
 $ mkdir -p logs qual
 
-$ for bam in ../../bowtie2/*Nanog*aln.bam ../../bowtie2/*Pou5f1*aln.bam
+$ for bam in ../bowtie2/*aln.bam
 do
 bam2=`basename $bam _aln.bam`
-Rscript run_spp_nodups.R -c=$bam -savp -out=qual/${bam2}.qual > logs/${bam2}.Rout
+Rscript run_spp.R -c=$bam -savp -out=qual/${bam2}.qual > logs/${bam2}.Rout
 done
 ```
 
@@ -323,7 +228,7 @@ files. These are pdf files that contain the **cross-correlation** plot for each
 sample. Let's move those files into the appropriate output directory:
 
 ```
-$ mv ../../bowtie2/*pdf qual
+$ mv ../bowtie2/*pdf qual
 
 ```
 
@@ -335,7 +240,7 @@ locally and open up with Excel.
 $ cat qual/*qual > qual/phantompeaks_summary.xls
 ```
 
-Let's use Filezilla or `scp` move the summary file over to our local machine for
+Let's use Cyberduck or `scp` and move the summary file over to our local machine for
 viewing. Open up the file in Excel and take a look at our NSC and RSC values.
 
 ### `phantompeakqualtools`: quality metrics output
