@@ -193,7 +193,7 @@ $ cp /home/classroom/hpcbio/bowtie2/*.bam* ~/ngs_course/chipsep/results/bowtie2/
 ### Running `phantompeakqualtools`
 
 To obtain quality measures based on cross-correlation plots, we will be running
-the `run_spp_nodups.R` script from the command line which is a package built on
+the `run_spp.R` script from the command line which is a package built on
 SPP. This modified SPP package allows for determination of the cross-correlation
 peak and predominant fragment length in addition to peak calling. We will be
 using this package solely for obtaining these quality measures (no peak
@@ -206,11 +206,40 @@ The options that we will be using include:
 * `-out`: will create and/or append to a file several important characteristics
   of the dataset described in more detail below.
 
+First, we need to find the location of the R script that we use to run this.
+It's set as an executable but can't be run without using R, so we use a little
+Linux knowledge to work around this:
+
+```
+$ which run_spp.R
+/home/apps/software/Phantompeaktools/1.2-IGB-gcc-4.9.4-R-3.4.1/run_spp.R
+
+$ ln -s /home/apps/software/Phantompeaktools/1.2-IGB-gcc-4.9.4-R-3.4.1/run_spp.R .
+```
+
+If you list the directory it should look like this:
+
+```
+$ ls -l
+total 1
+lrwxrwxrwx 1 instru03 instru03 72 Nov 16 12:26 run_spp.R -> /home/apps/software/Phantompeaktools/1.2-IGB-gcc-4.9.4-R-3.4.1/run_spp.R
+```
+
+This is a symbolic link, which is just a pointer to the original file. You can
+alternatively use the full path to the script when you invoke it using
+`Rscript`, but then I couldn't show you what a symbolic link was.
+
+Now, if you wanted to compute metrics on a single file you normally do this:
+
 ```
 ## DO NOT RUN THIS
 ## THIS SCRIPT IS FOR COMPUTING METRICS ON A SINGLE FILE
 $ Rscript run_spp.R -c=<tagAlign/BAMfile> -savp -out=<outFile>
 ```
+
+You can also limit the strand shifts (x-axis in graph) by also using
+`-s=<min>:<step>:<max>` (default is `-s=-500:5:1500`).
+Since these should fairly narrow peaks, we will do that below.
 
 >**NOTE:** Even though the script is called `run_spp.R`, we aren't actually
 >performing peak calling with SPP.
@@ -224,7 +253,7 @@ $ mkdir -p logs qual
 $ for bam in ../bowtie2/*aln.bam
 do
 bam2=`basename $bam _aln.bam`
-Rscript run_spp.R -c=$bam -savp -out=qual/${bam2}.qual > logs/${bam2}.Rout
+Rscript run_spp.R -s=-100:5:500 -c=$bam -savp -out=qual/${bam2}.qual > logs/${bam2}.Rout
 done
 ```
 
@@ -247,7 +276,7 @@ locally and open up with Excel.
 $ cat qual/*qual > qual/phantompeaks_summary.xls
 ```
 
-Let's use Cyberduck or `scp` and move the summary file over to our local machine for
+Let's use Cyberduck and move the summary file over to our local machine for
 viewing. Open up the file in Excel and take a look at our NSC and RSC values.
 
 ### `phantompeakqualtools`: quality metrics output
@@ -262,13 +291,15 @@ The qual files are tab-delimited with the columns containing the following infor
 - COL6: corr_phantomPeak: Correlation value at phantom peak
 - COL7: argmin_corr: strand shift at which cross-correlation is lowest
 - COL8: min_corr: minimum value of cross-correlation
-- COL9: Normalized strand cross-correlation coefficient (NSC) = COL4 / COL8
-- COL10: Relative strand cross-correlation coefficient (RSC) = (COL4 - COL8) / (COL6 - COL8)
-- COL11: QualityTag: Quality tag based on thresholded RSC (codes: -2:veryLow,-1:Low,0:Medium,1:High,2:veryHigh)
 
-> **NOTE:** The most important metrics we are interested in are the values in
-> columns 9 through 11, however these numbers are computed from values in the
-> other columns.
+The most important metrics we are interested in are the values in
+columns 9 through 11 (these numbers are computed from values in the
+other columns)
+
+- **COL9**: Normalized strand cross-correlation coefficient (NSC) = COL4 / COL8
+- **COL10**: Relative strand cross-correlation coefficient (RSC) = (COL4 - COL8) / (COL6 - COL8)
+- **COL11**: QualityTag: Quality tag based on thresholded RSC (codes: -2:veryLow,-1:Low,0:Medium,1:High,2:veryHigh)
+
 
 **How do the values compare to the thresholds mentioned above?** All samples
 have quite high NSC values indicating more enrichment, a good signal to noise
@@ -287,7 +318,11 @@ machine to view the strand shift. The cross correlation peak shows the highest
 cross-correlation at fragment length 105, **How does this compare to the one we
 generated using MACS?**.
 
-<img src="../img/H1hesc_Nanog_Rep1_chr12_aln.png" width=400>
+<img src="../img/H1hesc_Nanog_Rep1_chr12_aln_500.png" width=400>
+
+Notice the difference with the input sample:
+
+<img src="../img/H1hesc_Input_Rep1_chr12_aln_500.png" width=400>
 
 ***
 *This lesson has been developed by members of the teaching team at the [Harvard
