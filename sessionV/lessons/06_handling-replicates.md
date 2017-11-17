@@ -120,6 +120,7 @@ $ bedtools intersect \
 
 <details>
   <summary><p>
+  
   **How many overlapping peaks did we get?**
   </p>
   </summary>
