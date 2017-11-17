@@ -81,7 +81,8 @@ $ bamCompare -b1 bowtie2/H1hesc_Pou5f1_Rep2_chr12_aln.bam \
 Here, we'll use a bash loop to run `bamCoverage` on all the original BAM files.
 
 ```
-$ for BAM in bowtie2/*.bam; do \
+$ for BAM in bowtie2/*.bam;
+    do \
     NAME=`basename ${BAM%.bam}`
     bamCoverage --bam $BAM --outFileFormat bigwig --ignoreDuplicates --outFileName visualization/$NAME.nn.bw 2> visualization/$NAME.bamCoverage.log
   done
