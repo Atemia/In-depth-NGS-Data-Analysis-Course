@@ -4,7 +4,7 @@ author: "Meeta Mistry"
 date: "Monday, June 27th, 2017"
 ---
 
-Contributors: Meeta Mistry, Radhika Khetani
+Contributors: Meeta Mistry, Radhika Khetani, Chris Fields
 
 Approximate time: 75 minutes
 
@@ -38,8 +38,7 @@ Additionally, there are more complex methods that employ statistical testing and
 evaluate the reproducibility between replicates. In this lesson we will cover
 both methods.
 
-> **NOTE: A recent talk on "Accessing and using ENCODE data" [linked
-> here](https://hstalks.com/t/2679/accessing-and-using-encode-data/?biosci)
+> **NOTE: A recent talk on "Accessing and using ENCODE data" [linked here](https://hstalks.com/t/2679/accessing-and-using-encode-data/?biosci)
 > where they talk about handling replicates and the similarities and differences
 > when using an overlap versus IDR analysis.**
 
@@ -60,7 +59,7 @@ and an extremely versatile tool that performs tasks of this nature.
 
 <img src="../img/bedtools.png" width="700">
 
-As the name implies, this suite of tools works with **Bed** files, but it also
+As the name implies, this suite of tools works with [**BED** files](https://genome.ucsc.edu/FAQ/FAQformat.html#format1), but it also
 works with other file formats that have genome coordinate information.
 
 <img src="../img/bedtools-basic.png" width="600">
@@ -122,6 +121,11 @@ $ bedtools intersect \
 **How many overlapping peaks did we get?**
 
 We'll do the same for the Pou5f1 replicates:
+
+<details>
+  <summary>Q1: What is the best Language in the World? </summary>
+   A1: JavaScript
+</details>
 
 ```bash
 $ bedtools intersect \
