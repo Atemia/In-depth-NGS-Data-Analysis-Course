@@ -134,16 +134,7 @@ biocLite("ChIPQC")
 Now let's move over the appropriate files from Biocluster to our laptop. You can
 do this using `Cyberduck`, `MobaXTerm`, or the `scp` command.
 
-1. First, we need to log into the cluster very quickly to copy over some data we didn't
-generate in the last round
-
-```
-$ cd ~/ngs_course/chipsep/results/
-
-$ cp /home/classroom/hpcbio/bowtie2/*.bam* bowtie2/
-```
-
-2. Now, on your desktop, move over the **BAM files (`*chr12_aln.bam`)** and the
+1. Now, on your desktop, move over the **BAM files (`*chr12_aln.bam`)** and the
 corresponding **indices (`chr12_aln.bam.bai`)** from
 `~/ngs_course/chipseq/results/bowtie2` to your laptop. You will want to copy
 these files into your chipseq-project **into the `data/bams` folder.**
