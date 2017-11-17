@@ -150,9 +150,7 @@ $ wc -l bedtools/Pou5f1-overlaps.bed
 
 </p>
 </details>
-<br>
-
-### `bedtools` overview
+<br><br>
 
 Note that we are working with subsetted data and so our list of peaks for each
 replicate is small. Thus, the overlapping peak set will be small as we found
