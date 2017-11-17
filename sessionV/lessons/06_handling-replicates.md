@@ -253,9 +253,9 @@ It is a Python program that has already been installed on Orchestra. The first
 thing we need to do is load the module to run IDR:
 
 ```bash
-$ export MODULEPATH=/home/classroom/hpcbio/chip-seq/modules:$MODULEPATH
 
-$ module load idr/2.0.4
+$ module load IDR/2.0.4-IGB-gcc-4.9.4-Python-3.6.1
+
 ```
 
 > *NOTE:* After loading the module, if your run the command `module list` you
