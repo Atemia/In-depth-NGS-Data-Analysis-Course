@@ -159,6 +159,10 @@ Let's start by loading the `ChIPQC` library and the samplesheet into R. Use the
 ## Load libraries
 library(ChIPQC)
 
+# We need to make sure BiocParallel is installed as well
+source("http://bioconductor.org/biocLite.R")
+biocLite("BiocParallel")
+
 # for this workshop we need to do this first to work around a bug on Windows
 library(BiocParallel)
 register(SerialParam())
