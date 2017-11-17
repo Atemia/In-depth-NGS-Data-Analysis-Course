@@ -119,11 +119,7 @@ $ bedtools intersect \
 ```
 
 <details>
-  <summary><p>
-  
-  **How many overlapping peaks did we get?**
-  </p>
-  </summary>
+  <summary>**How many overlapping peaks did we get?**</summary>
   <p>
 
 ```bash
