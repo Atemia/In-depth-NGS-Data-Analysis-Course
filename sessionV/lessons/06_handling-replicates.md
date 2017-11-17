@@ -301,10 +301,14 @@ with one another.
 <img src="../img/idr-idr.png" width=500>
 
 To run IDR we use the `idr` command followed by any necessary parameters. To see
-what parameters we have available to us, we can use:
+[what parameters](https://github.com/kundajelab/idr#command-line-arguments) we
+have available to us, we can use:
 
 ```bash
+
+# you can optionally run this, but it may take a little time
 $ idr -h
+
 ```
 
 For our run we will change only parameters associated with input and output
@@ -345,7 +349,6 @@ $ idr --samples Pou5f1-rep1_sorted_peaks.narrowPeak Pou5f1-rep2_sorted_peaks.nar
 
 </details>
 <br>
-<br>
 
 #### Output files
 
@@ -360,8 +363,8 @@ have a score of int(-125log2(0.05)) = 540, and IDR of 1.0 has a score of 0.
 respectively.** The global IDR is the value used to calculate the scaled IDR
 number in column 5, it _is analogous to a multiple hypothesis correction on a
 p-value to compute an FDR_. The local IDR is akin to the posterior probability
-of a peak belonging to the irreproducible noise component. You can read [this
-paper](http://projecteuclid.org/euclid.aoas/1318514284) for more details.
+of a peak belonging to the irreproducible noise component. You can read
+[this paper](http://projecteuclid.org/euclid.aoas/1318514284) for more details.
 
 The next four columns correspond to Replicate 1 peak data and the following four
 columns with Replicate 2 peak data.
@@ -372,9 +375,14 @@ Also, if you have any unanswered questions check out posts in the [Google groups
 Let's take a look at our output files. _How many common peaks are considered for
 each TF?_
 
+<details>
+
 ```bash
 $ wc -l *-idr
 ```
+
+</details>
+<br>
 
 To find out how may of those shared regions have an IDR < 0.05, we can take a
 look at the log files. Alternatively, since we requested all peaks and their IDR
@@ -422,107 +430,68 @@ truly good replicates.**
 
 <img src="../img/idr-pool.png" width=500>
 
-_We will not run this analysis, but have provided a bash script below if you
-wanted to take a stab at it._ To run this script you will need to:
+We provide [a bash script]() on the cluster for you to try this out. To run this
+script you will need to:
 
 * Provide BAM files and run it for each TF separately. These are located at
-  `/groups/hbctraining/ngs-data-analysis-longcourse/chipseq/bowtie2`. Or you can
+  `/home/classroom/hpcbio/chip-seq/bowtie2/`. Or you can
   point to the BAM files generated from Bowtie2 in the home directory.
-* Be sure to also ask for enough memory in your `bsub` command.
+* Be sure to also ask for enough memory in your `srun` command.
 * Change the paths for output to the directories that are relevant to you
 
-> _NOTE: For the paths and directories we are using `/n/scratch2`. This script
+> _NOTE: For the paths and directories we are using `/scratch`. This script
 > generates fairly large intermediate files which can quickly fill up your home
 > directory. To avoid this please make use of the scratch space and once the
 > analysis is complete move over only the relevant files._
 
+Let's set up a new results directory:
+
 ```bash
-#!/bin/sh
+$ cd ~/ngs_course/chipseq/results
 
-# USAGE: sh pseudorep_idr.sh <input BAM rep1> <chip BAM rep1> <input BAM rep2> <chip BAM rep2> <NAME for IDR output>
+$ mkdir IDR-pooled
 
-# This script will take the BAM files and perform the following steps:
-    ## Merge BAMs for ChiP files,
-    ## Shuffle reads and split into two new BAM files (pseudo-replicates),
-    ## Merge BAMs for Input files,
-    ## Shuffle reads and split into two new BAM files (pseudo-replicates),
-    ## Call peaks on pseudo-replicates with MACS2 ,
-    ## Sort peaks called on pseudo-replicates,
-    ## IDR analysis using pseudo-replicate peak calls
-
-# Please use the following LSF directives:
-	## -W 10:00
-	## -q priority
-	## -R "rusage[mem=40000]"
-	## -e pseudorep-idr.err
-
-date
-
-inputFile1=`basename $1`
-treatFile1=`basename $2`
-inputFile2=`basename $3`
-treatFile2=`basename $4`
-EXPT=$5
-
-NAME1=`basename $treatFile1 _full.bam`
-NAME2=`basename $treatFile2 _full.bam`
-
-# Make Directories
-mkdir -p /n/scratch2/mm573/idr_ngscourse/macs
-mkdir -p /n/scratch2/mm573/idr_ngscourse/pooled_pseudoreps
-mkdir -p /n/scratch2/mm573/idr_ngscourse/tmp
-
-# Set paths
-baseDir=/groups/hbctraining/ngs-data-analysis-longcourse/chipseq/bowtie2
-macsDir=/n/scratch2/mm573/idr_ngscourse/macs
-outputDir=/n/scratch2/mm573/idr_ngscourse/pooled_pseudoreps
-tmpDir=/n/scratch2/mm573/idr_ngscourse/tmp
-
-#Merge treatment BAMS
-echo "Merging BAM files for pseudoreplicates..."
-samtools merge -u ${tmpDir}/${NAME1}_${NAME2}_merged.bam $baseDir/${treatFile1} $baseDir/${treatFile2}
-samtools view -H ${tmpDir}/${NAME1}_${NAME2}_merged.bam > ${tmpDir}/${EXPT}_header.sam
-
-#Split merged treatments
-nlines=$(samtools view ${tmpDir}/${NAME1}_${NAME2}_merged.bam | wc -l ) # Number of reads in the BAM file
-nlines=$(( (nlines + 1) / 2 )) # half that number
-samtools view ${tmpDir}/${NAME1}_${NAME2}_merged.bam | shuf - | split -d -l ${nlines} - "${tmpDir}/${EXPT}" # This will shuffle the lines in the file and split it
- into two SAM files
-cat ${tmpDir}/${EXPT}_header.sam ${tmpDir}/${EXPT}00 | samtools view -bS - > ${outputDir}/${EXPT}00.bam
-cat ${tmpDir}/${EXPT}_header.sam ${tmpDir}/${EXPT}01 | samtools view -bS - > ${outputDir}/${EXPT}01.bam
-
-#Merge input BAMS
-echo "Merging input BAM files for pseudoreplicates..."
-samtools merge -u ${tmpDir}/${NAME1}input_${NAME2}input_merged.bam $baseDir/${inputFile1} $baseDir/${inputFile2}
-
-#Split merged treatment BAM
-nlines=$(samtools view ${tmpDir}/${NAME1}input_${NAME2}input_merged.bam | wc -l ) # Number of reads in the BAM file
-nlines=$(( (nlines + 1) / 2 )) # half that number
-samtools view ${tmpDir}/${NAME1}input_${NAME2}input_merged.bam | shuf - | split -d -l ${nlines} - "${tmpDir}/${EXPT}_input" # This will shuffle the lines in the file and split in two
-cat ${tmpDir}/${EXPT}_header.sam ${tmpDir}/${EXPT}_input00 | samtools view -bS - > ${outputDir}/${EXPT}_input00.bam
-cat ${tmpDir}/${EXPT}_header.sam ${tmpDir}/${EXPT}_input01 | samtools view -bS - > ${outputDir}/${EXPT}_input01.bam
-
-
-#Peak calling on pseudoreplicates
-echo "Calling peaks for pseudoreplicate1 "
-macs2 callpeak -t ${outputDir}/${EXPT}00.bam -c ${outputDir}/${EXPT}_input00.bam -f BAM -g hs -n $macsDir/${NAME1}_pr -B -p 1e-3  2> $macsDir/${NAME1}_pr_macs2.log
-
-echo "Calling peaks for pseudoreplicate2"
-macs2 callpeak -t ${outputDir}/${EXPT}01.bam -c ${outputDir}/${EXPT}_input01.bam -f BAM -g hs -n $macsDir/${NAME2}_pr -B -p 1e-3  2> $macsDir/${NAME2}_pr_macs2.log
-
-#Sort peak by -log10(p-value)
-echo "Sorting peaks..."
-sort -k8,8nr $macsDir/${NAME1}_pr_peaks.narrowPeak | head -n 100000 > $macsDir/${NAME1}_pr_sorted.narrowPeak
-sort -k8,8nr $macsDir/${NAME2}_pr_peaks.narrowPeak | head -n 100000 > $macsDir/${NAME2}_pr_sorted.narrowPeak
-
-#Independent replicate IDR
-echo "Running IDR on pseudoreplicates..."
-idr --samples $macsDir/${NAME1}_pr_sorted.narrowPeak $macsDir/${NAME2}_pr_sorted.narrowPeak --input-file-type narrowPeak --output-file ${EXPT}_pseudorep-idr --rank p.value --plot
-
-
-# Remove the tmp directory
-rm -r $tmpDir
+$ cd IDR-pooled
 ```
+
+Now, let's copy the script over:
+
+```bash
+$ cp /home/classroom/hpcbio/chip-seq/scripts/pseudorep_idr.sh .
+```
+
+Run on the Nanog samples:
+
+```bash
+$ ./pseudorep_idr.sh \
+  ../bowtie2/H1hesc_Input_Rep1_chr12_aln.bam \
+  ../bowtie2/H1hesc_Nanog_Rep1_chr12_aln.bam \
+  ../bowtie2/H1hesc_Input_Rep2_chr12_aln.bam \
+  ../bowtie2/H1hesc_Nanog_Rep2_chr12_aln.bam \
+  pooled_Nanog
+```
+
+You should have output that looks like this:
+
+```
+Thu Nov 16 22:36:31 CST 2017
+Merging BAM files for pseudoreplicates...
+Merging input BAM files for pseudoreplicates...
+Calling peaks for pseudoreplicate1
+Calling peaks for pseudoreplicate2
+Sorting peaks...
+Running IDR on pseudoreplicates...
+Initial parameter values: [0.10 1.00 0.20 0.50]
+Final parameter values: [1.87 0.62 0.84 0.35]
+Number of reported peaks - 174/174 (100.0%)
+
+Number of peaks passing IDR cutoff of 0.05 - 55/174 (31.6%)
+```
+
+Your numbers (# peaks, peaks passing IDR, etc) will likely not match this, since
+there are some steps in the process (shuffling) which lead to different results.
+In general, this would need to be run many times to determine whether the #
+significant peaks start to converge.
 
 ### Self-consistency analysis
 
@@ -536,8 +505,7 @@ are truly good replicates.**
 
 ### Threshold guidelines
 
-The user manual provides [guidelines on IDR
-thresholds](https://sites.google.com/site/anshulkundaje/projects/idr#TOC-GETTING-THRESHOLDS-TO-TRUNCATE-PEAK-LISTS)
+The user manual provides [guidelines on IDR thresholds](https://sites.google.com/site/anshulkundaje/projects/idr#TOC-GETTING-THRESHOLDS-TO-TRUNCATE-PEAK-LISTS)
 which are recommended for the different types of IDR analyses. Depending on the
 organism you are studying and the total number of peaks you are starting with
 you will want to modify the thresholds accordingly.
