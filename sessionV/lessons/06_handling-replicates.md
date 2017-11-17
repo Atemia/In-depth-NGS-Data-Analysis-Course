@@ -118,7 +118,7 @@ $ bedtools intersect \
 -wo > bedtools/Nanog-overlaps.bed
 ```
 
-<details><summary>**How many overlapping peaks did we get?**</summary><p>
+<details><summary><p>**How many overlapping peaks did we get?**</p></summary><p>
 
 ```bash
 $ wc -l bedtools/Pou5f1-overlaps.bed
@@ -126,7 +126,9 @@ $ wc -l bedtools/Pou5f1-overlaps.bed
 
 </p></details>
 
-We'll do the same for the Pou5f1 replicates:
+
+
+Do the same for the Pou5f1 replicates:
 
 <details><summary>Try on your own first.  No peeking!</summary><p>
 
