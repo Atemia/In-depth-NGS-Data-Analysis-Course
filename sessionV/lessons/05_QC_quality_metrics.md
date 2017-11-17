@@ -204,7 +204,7 @@ report with tables and figures.
 ```
 
 ## Create ChIPQC report
-ChIPQCreport(chipObj, reportName="ChIP QC report: Nanog and Pou5f1", reportFolder="ChIPQCreport")
+ChIPQCreport(chipObj, reportName="ChIPQC", reportFolder="ChIPQCreport")
 
 ```
 
