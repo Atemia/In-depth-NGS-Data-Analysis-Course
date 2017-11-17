@@ -118,7 +118,13 @@ $ bedtools intersect \
 -wo > bedtools/Nanog-overlaps.bed
 ```
 
-**How many overlapping peaks did we get?**
+<details><summary>**How many overlapping peaks did we get?**</summary><p>
+
+```bash
+$ wc -l bedtools/Pou5f1-overlaps.bed
+```
+
+</p></details>
 
 We'll do the same for the Pou5f1 replicates:
 
@@ -133,6 +139,7 @@ $ bedtools intersect \
 
 </p></details>
 
+### `bedtools` overview
 
 Note that we are working with subsetted data and so our list of peaks for each
 replicate is small. Thus, the overlapping peak set will be small as we found
