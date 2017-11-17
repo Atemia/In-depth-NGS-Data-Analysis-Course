@@ -131,8 +131,8 @@ $ wc -l bedtools/Nanog-overlaps.bed
 ```
 
 </p>
-<br>
 </details>
+<br>
 
 2. Do the same for the Pou5f1 replicates.  Try this on your own first.  No peeking!
 
