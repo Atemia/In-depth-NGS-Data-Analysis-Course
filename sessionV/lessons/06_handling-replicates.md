@@ -122,10 +122,7 @@ $ bedtools intersect \
 
 We'll do the same for the Pou5f1 replicates:
 
-<details>
-  <summary>Q1: What is the best Language in the World? </summary>
-   A1: JavaScript
-</details>
+<details><summary>Try on your own first.  No peeking!</summary><p>
 
 ```bash
 $ bedtools intersect \
@@ -133,6 +130,9 @@ $ bedtools intersect \
 -b macs2/Pou5f1-rep2_peaks.narrowPeak \
 -wo > bedtools/Pou5f1-overlaps.bed
 ```
+
+</p></details>
+
 
 Note that we are working with subsetted data and so our list of peaks for each
 replicate is small. Thus, the overlapping peak set will be small as we found
