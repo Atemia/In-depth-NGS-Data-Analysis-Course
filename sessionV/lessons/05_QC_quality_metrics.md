@@ -159,6 +159,9 @@ Let's start by loading the `ChIPQC` library and the samplesheet into R. Use the
 ## Load libraries
 library(ChIPQC)
 
+# for this workshop we need to do this first to work around a bug on Windows
+register(SerialParam())
+
 ## Load sample data
 samples <- read.csv('meta/samplesheet_chr12.csv')
 View(samples)
