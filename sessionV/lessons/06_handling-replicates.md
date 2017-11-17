@@ -493,6 +493,22 @@ there are some steps in the process (shuffling) which lead to different results.
 In general, this would need to be run many times to determine whether the #
 significant peaks start to converge.
 
+Now, try running this on the Pou5f1 files (note the order of the files in the above script).
+
+<details>
+
+```bash
+$ ./pseudorep_idr.sh \
+  ../bowtie2/H1hesc_Input_Rep1_chr12_aln.bam \
+  ../bowtie2/H1hesc_Pou5f1_Rep1_chr12_aln.bam \
+  ../bowtie2/H1hesc_Input_Rep2_chr12_aln.bam \
+  ../bowtie2/H1hesc_Pou5f1_Rep2_chr12_aln.bam \
+  pooled_Pou5f1
+```
+
+</details>
+<br>
+
 ### Self-consistency analysis
 
 An _optional step_ is to create pseudo-replicates for each replicate by randomly
