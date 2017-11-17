@@ -203,7 +203,7 @@ you go down the ranked list. Qualitative, not adequate for selecting signals.
 <img src=../img/corr_curve.png width=400>
 
 2) An **inference procedure**: summarizes the proportion of reproducible and
-irreproducible signals. Quantitative, using a copula mixture model.
+irreproducible signals. Quantitative, using a [copula mixture model](https://en.wikipedia.org/wiki/Copula_(probability_theory)).
 
 > What proportion of identifications have a poor correspondence, i.e. falling into ”noise”?
 > How consistent are the identifications before reaching breakdown?
@@ -283,7 +283,7 @@ Now let's move into the `chipseq/results` directory and create a new directory
 for the results of our IDR analysis.
 
 ```bash
-$ cd ngs_course/chipseq/results
+$ cd ~/ngs_course/chipseq/results
 $ mkdir IDR
 ```
 
@@ -330,7 +330,9 @@ $ idr --samples Nanog-rep1_sorted_peaks.narrowPeak Nanog-rep2_sorted_peaks.narro
 --log-output-file nanog.idr.log
 ```
 
-And now with the Pou5f1 replicates:
+And now with the Pou5f1 replicates (try this on your own first)
+
+<details>
 
 ```bash
 $ idr --samples Pou5f1-rep1_sorted_peaks.narrowPeak Pou5f1-rep2_sorted_peaks.narrowPeak \
@@ -340,6 +342,10 @@ $ idr --samples Pou5f1-rep1_sorted_peaks.narrowPeak Pou5f1-rep2_sorted_peaks.nar
 --plot \
 --log-output-file pou5f1.idr.log
 ```
+
+</details>
+<br>
+<br>
 
 #### Output files
 
