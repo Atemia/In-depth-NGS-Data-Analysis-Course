@@ -204,6 +204,7 @@ report with tables and figures.
 ```
 
 ## Create ChIPQC report
+## On Windows, do NOT use report names with spaces, it won't write a final report file
 ChIPQCreport(chipObj, reportName="ChIPQC", reportFolder="ChIPQCreport")
 
 ```
