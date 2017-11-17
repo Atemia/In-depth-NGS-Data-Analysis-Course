@@ -430,7 +430,7 @@ truly good replicates.**
 
 <img src="../img/idr-pool.png" width=500>
 
-We provide [a bash script]() on the cluster for you to try this out. To run this
+We provide [a bash script](https://github.com/HPCBio/In-depth-NGS-Data-Analysis-Course/blob/HPCBio-Fall2017/sessionV/scripts/pseudorep_idr_biocluster.sh) on the cluster for you to try this out. To run this
 script you will need to:
 
 * Provide BAM files and run it for each TF separately. These are located at
