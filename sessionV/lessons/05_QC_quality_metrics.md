@@ -160,6 +160,7 @@ Let's start by loading the `ChIPQC` library and the samplesheet into R. Use the
 library(ChIPQC)
 
 # for this workshop we need to do this first to work around a bug on Windows
+library(BiocParallel)
 register(SerialParam())
 
 ## Load sample data
