@@ -185,8 +185,6 @@ $ cd chip_qc
 We need to copy in some data (namely BAM index files) that we generated for you:
 
 ```
-$ cd ~/ngs_course/chipsep/results/
-
 $ cp /home/classroom/hpcbio/chip-seq/bowtie2/*.bam* ~/ngs_course/chipseq/results/bowtie2/
 ```
 
