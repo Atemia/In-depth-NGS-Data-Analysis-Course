@@ -127,10 +127,7 @@ $ wc -l bedtools/Pou5f1-overlaps.bed
 </p></details>
 
 
-
-Do the same for the Pou5f1 replicates:
-
-<details><summary>Try on your own first.  No peeking!</summary><p>
+<details><summary>Do the same for the Pou5f1 replicates.  Try this on your own first.  No peeking!</summary><p>
 
 ```bash
 $ bedtools intersect \
