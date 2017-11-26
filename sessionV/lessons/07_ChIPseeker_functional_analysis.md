@@ -46,7 +46,10 @@ enrichment analyses of functional annotations.
 ```
 source("http://bioconductor.org/biocLite.R")
 biocLite("ChIPseeker")
+biocLite("clusterProfiler")
+biocLite("biomaRt")
 biocLite("TxDb.Hsapiens.UCSC.hg19.knownGene")
+biocLite("org.Hs.eg.db")
 ```
 
 ## Getting data
@@ -78,6 +81,7 @@ library(ChIPseeker)
 library(TxDb.Hsapiens.UCSC.hg19.knownGene)
 library(clusterProfiler)
 library(biomaRt)
+
 ```
 
 Now let's load all of the data. As input we need to provide the names of our BED files in a list format.
@@ -92,7 +96,9 @@ names(samplefiles) <- c("Nanog", "Pou5f1")
 
 We need to **assign annotation databases** generated from UCSC to a variable:
 
-	txdb <- TxDb.Hsapiens.UCSC.hg19.knownGene
+```r
+txdb <- TxDb.Hsapiens.UCSC.hg19.knownGene
+```
 
 > **NOTE:** *ChIPseeker supports annotating ChIP-seq data of a wide variety of
 > species if they have transcript annotation TxDb object available.* To find out
@@ -138,6 +144,7 @@ tagMatrixList <- lapply(as.list(samplefiles), getTagMatrix, windows=promoter)
 ## Profile plots
 plotAvgProf(tagMatrixList, xlim=c(-1000, 1000), conf=0.95,resample=500, facet="row")
 ```
+
 <img src="../img/density_profileplots.png">
 
 With these plots the confidence interval is estimated by bootstrap method (500
@@ -148,8 +155,10 @@ TSS with larger confidence intervals.
 
 The **heatmap is another method of visualizing the read count frequency** relative to the TSS.
 
-	# Plot heatmap
-	tagHeatmap(tagMatrixList, xlim=c(-1000, 1000), color=NULL)
+```r
+# Plot heatmap
+tagHeatmap(tagMatrixList, xlim=c(-1000, 1000), color=NULL)
+```
 
 <img src="../img/Rplot.png" width=500>
 
@@ -180,7 +189,8 @@ peakAnnoList <- lapply(samplefiles, annotatePeak, TxDb=txdb,
                        tssRegion=c(-1000, 1000), verbose=FALSE)
 ```
 
-If you take a look at what is stored in `peakAnnoList`, you will see a summary of genomic features for each sample:
+If you take a look at what is stored in `peakAnnoList`, you will see a summary
+of genomic features for each sample:
 
 ```
 > peakAnnoList
@@ -262,7 +272,9 @@ it can be useful to browse the data and subset calls of interest. The
 **annotation information** is stored in the `peakAnnoList` object. To retrieve
 it we use the following syntax:
 
-	nanog_annot <- as.data.frame(peakAnnoList[["Nanog"]]@anno)
+```r
+nanog_annot <- as.data.frame(peakAnnoList[["Nanog"]]@anno)
+```
 
 Take a look at this dataframe. You should see columns corresponding to your
 input BED file and addditional columns containing nearest gene(s), the distance
@@ -278,7 +290,9 @@ following priority in genomic annotation.
 * Downstream (defined as the downstream of gene end)
 * Intergenic
 
-One thing we **don't have is gene symbols** listed in table, but we can fetch them using **Biomart** and add them to the table before we write to file. This makes it easier to browse through the results.
+One thing we **don't have is gene symbols** listed in table, but we can fetch
+them using **Biomart** and add them to the table before we write to file. This
+makes it easier to browse through the results.
 
 ```
 # Get entrez gene Ids
@@ -310,20 +324,29 @@ write.table(out, file="results/Nanog_annotation.txt", sep="\t", quote=F, row.nam
 
 ## Functional enrichment analysis
 
-Once we have obtained gene annotations for our peak calls, we can perform functional enrichment analysis to **identify predominant biological themes among these genes** by incorporating knowledge from biological ontologies such as Gene Ontology, KEGG and Reactome.
+Once we have obtained gene annotations for our peak calls, we can perform
+functional enrichment analysis to **identify predominant biological themes among
+these genes** by incorporating knowledge from biological ontologies such as Gene
+Ontology, KEGG and Reactome.
 
-Enrichment analysis is a widely used approach to identify biological themes, and we talked about this in great detail during our RNA-seq analysis. Once we have the gene list, it can be used as input to functional enrichment tools such as clusterProfiler (Yu et al., 2012), DOSE (Yu et al., 2015) and ReactomePA. We will go through a few examples here.
+Enrichment analysis is a widely used approach to identify biological themes, and
+we talked about this in great detail during our RNA-seq analysis. Once we have
+the gene list, it can be used as input to functional enrichment tools such as
+clusterProfiler (Yu et al., 2012), DOSE (Yu et al., 2015) and ReactomePA. We
+will go through a few examples here.
 
 
 ### Single sample analysis
 
-Let's start with something we have seen before with RNA-seq functional analysis. We will take our gene list from **Nanog annotations** and use them as input for a **GO enrichment analysis**.
+Let's start with something we have seen before with RNA-seq functional analysis.
+We will take our gene list from **Nanog annotations** and use them as input for
+a **GO enrichment analysis**.
 
 ```
 # Run GO enrichment analysis
 ego <- enrichGO(gene = entrez,
-                    keytype = "ENTREZID",
-                    OrgDb = org.Hs.eg.db,
+                    keyType = "ENTREZID",
+                    OrgDb = 'org.Hs.eg.db',
                     ont = "BP",
                     pAdjustMethod = "BH",
                     qvalueCutoff = 0.05,
@@ -334,7 +357,13 @@ cluster_summary <- data.frame(ego)
 write.csv(cluster_summary, "results/clusterProfiler_Nanog.csv")
 ```
 
-We can visualize the results using the `dotplot` function. We find many terms related to **development and differentiation** and amongst those in the bottom half of the list we see 'stem cell population maintenance'. Functionally, Nanog blocks differentiation. Thus, negative regulation of Nanog is required to promote differentiation during embryonic development. Recently, Nanog has been shown to be involved in neural stem cell differentiation which might explain the abundance of neuro terms we observe.
+We can visualize the results using the `dotplot` function. We find many terms
+related to **development and differentiation** and amongst those in the bottom
+half of the list we see 'stem cell population maintenance'. Functionally, Nanog
+blocks differentiation. Thus, negative regulation of Nanog is required to
+promote differentiation during embryonic development. Recently, Nanog has been
+shown to be involved in neural stem cell differentiation which might explain the
+abundance of neuro terms we observe.
 
 ```
 # Dotplot visualization
@@ -344,21 +373,27 @@ dotplot(ego, showCategory=50)
 <img src="../img/dotplot.png">
 
 
-Let's try a **KEGG pathway enrichment** and visualize again using the the dotplot. Again, we see a relevant pathway 'Signaling pathways regulating pluripotency of stem cells'.
+Let's try a **KEGG pathway enrichment** and visualize again using the the
+dotplot. Again, we see a relevant pathway 'Signaling pathways regulating
+pluripotency of stem cells'.
 
 ```
 ekegg <- enrichKEGG(gene = entrez,
                  organism = 'hsa',
                  pvalueCutoff = 0.05)
 
-dotplot(kk)
+dotplot(ekegg)
 ```
 
 <img src="../img/kegg-dotplot.png">
 
 ### Multiple samples
 
-Our dataset consist of two different transcription factor peak calls, so it would be useful to compare functional enrichment results from both. We will do this using the `compareCluster` function. We see similar terms showing up, and in particular the stem cell term is more significant (and a higher gene ratio) in the Pou5f1 data.
+Our dataset consist of two different transcription factor peak calls, so it
+would be useful to compare functional enrichment results from both. We will do
+this using the `compareCluster` function. We see similar terms showing up, and
+in particular the stem cell term is more significant (and a higher gene ratio)
+in the Pou5f1 data.
 
 ```
 # Create a list with genes from each sample
@@ -376,8 +411,19 @@ plot(compKEGG, showCategory = 20, title = "KEGG Pathway Enrichment Analysis")
 <img src="../img/compareCluster.png">
 
 
-We have only scratched the surface here with functional analyses. Since the data is compatible with many current R packages for functional enrichment the possibilities there is alot of flexibility and room for customization. For more detailed analysis we encourage you to browse through the [ChIPseeker vignette](http://bioconductor.org/packages/release/bioc/vignettes/ChIPseeker/inst/doc/ChIPseeker.html) and the [clusterProfiler vignette](https://www.bioconductor.org/packages/devel/bioc/vignettes/clusterProfiler/inst/doc/clusterProfiler.html).
+We have only scratched the surface here with functional analyses. Since the data
+is compatible with many current R packages for functional enrichment the
+possibilities there is alot of flexibility and room for customization. For more
+detailed analysis we encourage you to browse through the [ChIPseeker
+vignette](http://bioconductor.org/packages/release/bioc/vignettes/ChIPseeker/inst/doc/ChIPseeker.html)
+and the [clusterProfiler
+vignette](https://www.bioconductor.org/packages/devel/bioc/vignettes/clusterProfiler/inst/doc/clusterProfiler.html).
 
 
 ***
-*This lesson has been developed by members of the teaching team at the [Harvard Chan Bioinformatics Core (HBC)](http://bioinformatics.sph.harvard.edu/). These are open access materials distributed under the terms of the [Creative Commons Attribution license](https://creativecommons.org/licenses/by/4.0/) (CC BY 4.0), which permits unrestricted use, distribution, and reproduction in any medium, provided the original author and source are credited.*
+*This lesson has been developed by members of the teaching team at the [Harvard
+Chan Bioinformatics Core (HBC)](http://bioinformatics.sph.harvard.edu/). These
+are open access materials distributed under the terms of the [Creative Commons
+Attribution license](https://creativecommons.org/licenses/by/4.0/) (CC BY 4.0),
+which permits unrestricted use, distribution, and reproduction in any medium,
+provided the original author and source are credited.*
