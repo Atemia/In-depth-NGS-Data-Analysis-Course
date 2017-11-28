@@ -105,9 +105,8 @@ more than two of the samples.* This consensus set represents the overall set of
 candidate binding sites to be used in further analysis.
 
 ```
-samples <- read.csv('diffBind/samples_chr12_DiffBind.csv')
+samples <- read.csv('meta/samplesheet_chr12.csv')
 dbObj <- dba(sampleSheet=samples)
-
 ```
 
 Take a look at what information gets summarized in the `dbObj`. *How many
@@ -117,12 +116,12 @@ disproportionatley larger number of peaks?*
 ```
 > dbObj
 
-4 Samples, 83 sites in matrix (263 total):
+4 Samples, 79 sites in matrix (252 total):
            ID Factor Replicate Caller Intervals
-1  Nanog-Rep1  Nanog         1 narrow        95
-2  Nanog-Rep2  Nanog         2 narrow       162
-3 Pou5f1-Rep1 Pou5f1         1 narrow        89
-4 Pou5f1-Rep2 Pou5f1         2 narrow        33
+1  Nanog.Rep1  Nanog         1 narrow        95
+2  Nanog.Rep2  Nanog         2 narrow       144
+3 Pou5f1.Rep1 Pou5f1         1 narrow        86
+4 Pou5f1.Rep2 Pou5f1         2 narrow        38
 ```
 
 ### Affinity binding matrix
@@ -140,28 +139,36 @@ We use the `dba.count()` function with the following additional parameter:
 * `bUseSummarizeOverlaps`: to use a more standard counting procedure than the built-in one by default.
 
 ```
+
 dbObj <- dba.count(dbObj, bUseSummarizeOverlaps=TRUE)
+
 ```
+
+We'll get a warning here regarding ignoring fragment size with the settings above.
 
 Take a look at the `dbObj` again. You should know see a column that contains the
 FRiP values for each sample.
 
 ```
 > dbObj
-4 Samples, 83 sites in matrix:
+
+4 Samples, 79 sites in matrix:
            ID Factor Replicate Caller Intervals FRiP
-1  Nanog-Rep1  Nanog         1 counts        83 0.03
-2  Nanog-Rep2  Nanog         2 counts        83 0.04
-3 Pou5f1-Rep1 Pou5f1         1 counts        83 0.03
-4 Pou5f1-Rep2 Pou5f1         2 counts        83 0.02
+1  Nanog.Rep1  Nanog         1 counts        79 0.03
+2  Nanog.Rep2  Nanog         2 counts        79 0.04
+3 Pou5f1.Rep1 Pou5f1         1 counts        79 0.03
+4 Pou5f1.Rep2 Pou5f1         2 counts        79 0.02
 ```
 
 To see how well the samples cluster with one another, we can draw a **PCA plot**
 using all 83 consensus sites. You should see both Nanog and Pou5f1 replicates
 clustering together.
 
-	dba.plotPCA(dbObj,  attributes=DBA_FACTOR, label=DBA_ID)
+```r
 
+dba.plotPCA(dbObj,  attributes=DBA_FACTOR, label=DBA_ID)
+
+```
 
 <img src="../img/pcaplot.png" width=600>
 
@@ -169,14 +176,25 @@ clustering together.
 We can also plot a **correlation heatmap**, to evaluate the relationship between
 samples.
 
-	plot(dbObj)
+```r
 
+plot(dbObj)
+
+```
 
 <img src="../img/db-heatmap.png" width=600>
 
-To evaluate how many peaks overlap between all samples we can plot a **Venn diagram**:
+Note this is different than the past correlation analysis, which looked at
+overall coverage.
 
-	dba.plotVenn(dbObj, 1:4)
+To evaluate how many peaks overlap between all samples we can plot a **Venn
+diagram**:
+
+```r
+
+dba.plotVenn(dbObj, 1:4)
+
+```
 
 <img src="../img/venn-db.png" width=600>
 
@@ -188,7 +206,11 @@ samples we want to compare to one another**. In our case we only have one factor
 of interest which is the different transcription factor IPs. Contrasts are set
 up using the `dba.contrast` function, as follows:
 
-	dbObj <- dba.contrast(dbObj, categories=DBA_FACTOR, minMembers = 2)
+```r
+
+dbObj <- dba.contrast(dbObj, categories=DBA_FACTOR, minMembers = 2)
+
+```
 
 ### Performing the differential analysis
 
@@ -197,9 +219,11 @@ analysis, which enables binding sites to be identified that are **statistically 
 
 The main differential analysis function is invoked as follows:
 
+```r
 
-	dbObj <- dba.analyze(dbObj, method=DBA_ALL_METHODS)
+dbObj <- dba.analyze(dbObj, method=DBA_ALL_METHODS)
 
+```
 
 To see a summary of results for each tool we can use `dba.show`:
 
@@ -207,7 +231,7 @@ To see a summary of results for each tool we can use `dba.show`:
 dba.show(dbObj, bContrasts=T)
 
   Group1 Members1 Group2 Members2 DB.edgeR DB.DESeq2
-1  Nanog        2 Pou5f1        2       11        36
+1  Nanog        2 Pou5f1        2       12        26
 ```
 
 
@@ -218,7 +242,11 @@ stringent threshold of 0.01? (HINT: use `th=0.01`)*
 Try plotting a PCA but this time **only use the regions that were identified as
 significant by DESeq2** using the code below.
 
-	dba.plotPCA(dbObj, contrast=1, method=DBA_DESEQ2, attributes=DBA_FACTOR, label=DBA_ID)
+```r
+
+dba.plotPCA(dbObj, contrast=1, method=DBA_DESEQ2, attributes=DBA_FACTOR, label=DBA_ID)
+
+```
 
 <img src="../img/deseq2-pca.png" width=600>
 
@@ -228,15 +256,22 @@ significant by DESeq2** using the code below.
 
 For a quick look at the **overlapping peaks** identified by the two different tools (DESeq2 and edgeR) we can plot a Venn diagram.
 
-	dba.plotVenn(dbObj,contrast=1,method=DBA_ALL_METHODS)
+```
+
+dba.plotVenn(dbObj,contrast=1,method=DBA_ALL_METHODS)
+
+```
 
 <img src="../img/venn-deseq-edger.png" width=600>
 
-> **NOTE:** Normally, we would keep the list of consensus peaks from edgeR and DESeq2 to use as our *high confidence set* to move forward with. But since we have an overlap of only two regions we will keep the results from both tools.
+> **NOTE:** Normally, we would keep the list of consensus peaks from edgeR and
+> DESeq2 to use as our *high confidence set* to move forward with. But since we
+> have an overlap of only two regions we will keep the results from both tools.
 
 To extract the full results from each method we use `dba.report`:
 
 ```
+
 comp1.edgeR <- dba.report(dbObj, method=DBA_EDGER, contrast = 1, th=1)
 comp1.deseq <- dba.report(dbObj, method=DBA_DESEQ2, contrast = 1, th=1)
 
@@ -248,22 +283,14 @@ comp1.deseq <- dba.report(dbObj, method=DBA_DESEQ2, contrast = 1, th=1)
 > head(comp1.edgeR)
 
 GRanges object with 6 ranges and 6 metadata columns:
-     seqnames               ranges strand |      Conc Conc_Nanog Conc_Pou5f1
-        <Rle>            <IRanges>  <Rle> | <numeric>  <numeric>   <numeric>
-  23    chr12 [ 7941791,  7941989]      * |      4.31       0.98        5.24
-  62    chr12 [25991058, 25991248]      * |      3.52      -0.72        4.48
-  19    chr12 [ 7243330,  7243609]      * |      5.47       2.55        6.37
-  41    chr12 [14347305, 14347638]      * |      4.17       1.37        5.06
-  36    chr12 [13241391, 13241794]      * |       6.1       4.21        6.89
-  37    chr12 [13408751, 13409414]      * |      6.23       4.56        6.98
-          Fold   p-value       FDR
-     <numeric> <numeric> <numeric>
-  23     -4.26  1.14e-08  5.85e-07
-  62      -5.2  1.41e-08  5.85e-07
-  19     -3.82  5.38e-08  1.49e-06
-  41     -3.69  2.52e-07  5.22e-06
-  36     -2.69  1.88e-06  3.12e-05
-  37     -2.43  9.53e-06  0.000132
+     seqnames               ranges strand |      Conc Conc_Nanog Conc_Pou5f1      Fold   p-value       FDR
+        <Rle>            <IRanges>  <Rle> | <numeric>  <numeric>   <numeric> <numeric> <numeric> <numeric>
+  59    chr12 [25991058, 25991253]      * |      4.44      -0.79        5.42     -6.21  7.46e-07   5.9e-05
+  21    chr12 [ 7941791,  7941993]      * |      4.76       0.79        5.71     -4.92  2.89e-06  0.000114
+  38    chr12 [14347305, 14347638]      * |      4.91        1.4        5.85     -4.45   1.2e-05  0.000317
+  18    chr12 [ 7243330,  7243609]      * |      5.37       2.52        6.27     -3.74     7e-05   0.00138
+  33    chr12 [13241391, 13241791]      * |      6.31       4.07        7.15     -3.08  0.000219   0.00347
+  13    chr12 [ 6378348,  6378578]      * |      4.87       2.09        5.76     -3.66  0.000546   0.00719
   -------
   seqinfo: 1 sequence from an unspecified genome; no seqlengths
 
@@ -287,7 +314,11 @@ The value columns are described below:
 as well as seeing which of the data points are being identified as
 differentially bound.
 
-	dba.plotMA(dbObj, method=DBA_DESEQ2)
+```
+
+dba.plotMA(dbObj, method=DBA_DESEQ2)
+
+```
 
 <img src="../img/maplot.png" width=600>
 
@@ -299,17 +330,27 @@ the Nanog than loss, as evidenced by red dots above the center line. This same
 data can also be shown with the **concentrations of each sample groups plotted
 against each other**.
 
+```
 
-	dba.plotMA(dbObj, bXY=TRUE)
+dba.plotMA(dbObj, bXY=TRUE)
+
+```
 
 <img src="../img/maplotXY.png" width=600>
 
 If we want to see **how the reads are distributed amongst the different classes
 of differentially bound sites and sample group**s, we can use a boxplot:
 
-	pvals <- dba.plotBox(dbObj)
+```
+
+pvals <- dba.plotBox(dbObj)
+
+```
 
 <img src="../img/boxplot-db.png" width=600>
+
+Note the warnings; for this sample set we have a very low number of peaks, so
+ties aren't completely unexpected.
 
 The left two boxes show distribution of reads over all differentially bound
 sites in the Nanog and Pou5f1 groups. Samples have a somewhat higher mean read
@@ -367,4 +408,3 @@ are open access materials distributed under the terms of the [Creative Commons
 Attribution license](https://creativecommons.org/licenses/by/4.0/) (CC BY 4.0),
 which permits unrestricted use, distribution, and reproduction in any medium,
 provided the original author and source are credited.*
-
