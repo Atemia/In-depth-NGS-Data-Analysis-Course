@@ -36,13 +36,16 @@ enrichment analyses of functional annotations.
 ## Setting up
 
 1. Open up RStudio and open up the `chipseq-project` that we created previously.
+
+> **Note:** If the desktop folder you had previously is no longer present, you can download a copy of the folder here:
+
 2. Open up a new R script ('File' -> 'New File' -> 'Rscript'), and save it as `chipseeker.R`
 
-> **NOTE:** This next section assumes you have the `ChIPseeker` package
-> installed for R 3.3.3. You will also need one additional library for gene
-> annotation. If you haven't done this please run the following lines of code
-> before proceeding.
->
+3. This next section assumes you have the `ChIPseeker` package installed for R.
+You will also need additional libraries for gene annotation and basic
+clustering. If you haven't done this please run the following lines of code
+before proceeding.
+
 ```
 source("http://bioconductor.org/biocLite.R")
 biocLite("ChIPseeker")
@@ -65,15 +68,16 @@ ChIPseeker package.
 > **NOTE:** the number of peaks in these BED files are are significantly higher
 > than what we observed with the subsetted data replicate analysis.
 
-We will need to copy over the appropriate files from Orchestra to our laptop.
-You can do this using `FileZilla` or the `scp` command.
+We will need to copy over the appropriate files from Biocluster to our laptop.
+You can do this using `Cyberduck` or `MobaXterm` (you can also use 'scp' or
+similar from a Mac terminal).
 
-Move over the **BED files from
-Orchestra(`/groups/hbctraining/chip-seq/full-dataset/idr/*.bed`) to your
-laptop**. You will want to copy these files into your chipseq-project **into a
+Move over the **BED files from Biocluster
+(`/home/classroom/hpcbio/chip-seq/idr-bed/*.bed`) to your laptop**. You will
+want to copy these files into your chipseq-project **into a
 new folder called `data/idr-bed`.**
 
-Let's start by loading the libraries:
+Let's start by loading the libraries.  Type these into your 'Source' window in the script, then highlight the commands and select 'Run'.
 
 ```r
 # Load libraries
@@ -81,7 +85,6 @@ library(ChIPseeker)
 library(TxDb.Hsapiens.UCSC.hg19.knownGene)
 library(clusterProfiler)
 library(biomaRt)
-
 ```
 
 Now let's load all of the data. As input we need to provide the names of our BED files in a list format.
@@ -91,10 +94,11 @@ Now let's load all of the data. As input we need to provide the names of our BED
 samplefiles <- list.files("data/idr-bed", pattern= ".bed", full.names=T)
 samplefiles <- as.list(samplefiles)
 names(samplefiles) <- c("Nanog", "Pou5f1")
-
 ```
 
-We need to **assign annotation databases** generated from UCSC to a variable:
+What does `samplefiles` look like?
+
+We also need to **assign annotation databases** generated from UCSC to a variable:
 
 ```r
 txdb <- TxDb.Hsapiens.UCSC.hg19.knownGene
@@ -102,11 +106,9 @@ txdb <- TxDb.Hsapiens.UCSC.hg19.knownGene
 
 > **NOTE:** *ChIPseeker supports annotating ChIP-seq data of a wide variety of
 > species if they have transcript annotation TxDb object available.* To find out
-> which genomes have the annotation available follow [this
-> link](http://bioconductor.org/packages/3.5/data/annotation/) and scroll down
+> which genomes have the annotation available follow [this link](http://bioconductor.org/packages/3.5/data/annotation/) and scroll down
 > to "TxDb". Also, if you are interested in creating your own TxDb object you
-> will find [more information
-> here](https://bioconductor.org/packages/devel/bioc/vignettes/GenomicFeatures/inst/doc/GenomicFeatures.pdf).
+> will find [more information here](https://bioconductor.org/packages/devel/bioc/vignettes/GenomicFeatures/inst/doc/GenomicFeatures.pdf).
 
 ### Visualization
 
@@ -122,11 +124,9 @@ pou5f1 <- readPeakFile(samplefiles[[2]])
 
 # Plot covplot
 covplot(nanog, weightCol="V5")
-
 ```
 
 <img src="../img/covplot.png">
-
 
 Using a window of +/- 1000bp around the TSS of genes we can plot the **density
 of read count frequency to see where binding is relative to the TSS** or each
@@ -137,13 +137,21 @@ together to compare the two.
 ```
 # Prepare the promotor regions
 promoter <- getPromoters(TxDb=txdb, upstream=1000, downstream=1000)
+```
 
+Here it's worth pausing to state what this next line is doing.  Can anyone guess?
+
+```
 # Calculate the tag matrix
-tagMatrixList <- lapply(as.list(samplefiles), getTagMatrix, windows=promoter)
+tagMatrixList <- lapply(samplefiles, getTagMatrix, windows=promoter)
+```
 
-## Profile plots
+```
+# Profile plots
 plotAvgProf(tagMatrixList, xlim=c(-1000, 1000), conf=0.95,resample=500, facet="row")
 ```
+
+This may take a little time.
 
 <img src="../img/density_profileplots.png">
 
@@ -185,6 +193,7 @@ Entrez gene ID is 9736.
 Let's start by retrieving annotations for our Nanog and Pou5f1 peaks calls:
 
 ```
+# Get annotations
 peakAnnoList <- lapply(samplefiles, annotatePeak, TxDb=txdb,
                        tssRegion=c(-1000, 1000), verbose=FALSE)
 ```
@@ -193,7 +202,8 @@ If you take a look at what is stored in `peakAnnoList`, you will see a summary
 of genomic features for each sample:
 
 ```
-> peakAnnoList
+# type 'peakAnnoList' at the R prompt in the console (command line) window
+
 $Nanog
 Annotated peaks generated by ChIPseeker
 11023/11035  peaks were annotated
@@ -232,6 +242,7 @@ functions can also support comparing across samples.
 ### Pie chart of genomic region annotation
 
 ```
+# Pie chart
 plotAnnoPie(peakAnnoList[["Nanog"]])
 ```
 
@@ -240,19 +251,36 @@ plotAnnoPie(peakAnnoList[["Nanog"]])
 ### Vennpie of genomic region annotation
 
 ```
+# Venn pie
 vennpie(peakAnnoList[["Nanog"]])
 ```
 
+You can see overlaps here, but actual size of sets is hard to determine.
+
 <img src="../img/vennpie.png" width=500>
 
-### Barchart (multiple samples for comparison)
+### Upset Plot
+
+Let's generate an [upset plot](http://caleydo.org/tools/upset/). This is another
+way to show intersections of sets, and is useful if you have more than three
+categories.
+
+```
+# Upset plot
+upsetplot(peakAnnoList[["Nanog"]], sets.bar.color = "lightgreen")
+```
+
+### Barchart
+
+We'll run both Nanog and Pou5f1 here for comparison.
 
 **Here, we see that Nanog has a much larger percentage of peaks in promotor regions.**
 
 ```
+# Bar chart
 plotAnnoBar(peakAnnoList)
-
 ```
+
 <img src="../img/feature-distribution.png">
 
 ### Distribution of TF-binding loci relative to TSS (multiple samples)
@@ -260,10 +288,11 @@ plotAnnoBar(peakAnnoList)
 **Nanog has also majority of binding regions falling in closer proximity to the TSS (0-10kb).**
 
 ```
+# Distance to TSS
 plotDistToTSS(peakAnnoList, title="Distribution of transcription factor-binding loci \n relative to TSS")
 ```
-<img src="../img/tss-dist.png">
 
+<img src="../img/tss-dist.png">
 
 ### Writing annotations to file
 
@@ -273,7 +302,9 @@ it can be useful to browse the data and subset calls of interest. The
 it we use the following syntax:
 
 ```r
+# extract annotation
 nanog_annot <- as.data.frame(peakAnnoList[["Nanog"]]@anno)
+head(nanog_annot)
 ```
 
 Take a look at this dataframe. You should see columns corresponding to your
@@ -320,8 +351,6 @@ out <- cbind(nanog_annot[,1:13], geneSymbol=entrez2gene$external_gene_name[m], n
 write.table(out, file="results/Nanog_annotation.txt", sep="\t", quote=F, row.names=F)
 ```
 
-
-
 ## Functional enrichment analysis
 
 Once we have obtained gene annotations for our peak calls, we can perform
@@ -329,12 +358,11 @@ functional enrichment analysis to **identify predominant biological themes among
 these genes** by incorporating knowledge from biological ontologies such as Gene
 Ontology, KEGG and Reactome.
 
-Enrichment analysis is a widely used approach to identify biological themes, and
-we talked about this in great detail during our RNA-seq analysis. Once we have
-the gene list, it can be used as input to functional enrichment tools such as
-clusterProfiler (Yu et al., 2012), DOSE (Yu et al., 2015) and ReactomePA. We
-will go through a few examples here.
-
+Enrichment analysis is a widely used approach to identify biological themes. If
+you took the RNA-Seq workshop this may have been covered in great detail there.
+Once we have the gene list, it can be used as input to functional enrichment
+tools such as clusterProfiler (Yu et al., 2012), DOSE (Yu et al., 2015) and
+ReactomePA. We will go through a few examples here.
 
 ### Single sample analysis
 
@@ -372,12 +400,12 @@ dotplot(ego, showCategory=50)
 
 <img src="../img/dotplot.png">
 
-
 Let's try a **KEGG pathway enrichment** and visualize again using the the
 dotplot. Again, we see a relevant pathway 'Signaling pathways regulating
 pluripotency of stem cells'.
 
 ```
+# Run KEGG enrichment analysis
 ekegg <- enrichKEGG(gene = entrez,
                  organism = 'hsa',
                  pvalueCutoff = 0.05)
