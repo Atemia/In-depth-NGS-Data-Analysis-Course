@@ -36,65 +36,114 @@ Approximate time: 45 minutes
 >
 > -[https://genome.ucsc.edu/goldenpath/help/bigWig.html](https://genome.ucsc.edu/goldenpath/help/bigWig.html)
 
+If you have logged out of your prior interactive session, restart one now:
+
+```bash
+$ srun -n 2 --mem 2000 -p classroom --pty bash
+````
+
+Switch back into the work directory, and create a new directory for generating the bigWig files:
+
 ```bash
 $ cd ~/ngs_course/chipseq/results/
 
 $ mkdir visualization
 ```
 
-```bash
-$ module load module load deepTools/2.5.3-IGB-gcc-4.9.4-Python-2.7.13
+Load in deeptools:
 
-$ bamCompare -h
+```bash
+$ module load deepTools/2.5.3-IGB-gcc-4.9.4-Python-2.7.13
 ```
+
+We'll use the `bamCompare` script to generate some comparative tracks.
+
+> For comprehensive help the deeptools
+> [`bamCompare`](https://deeptools.readthedocs.io/en/latest/content/tools/bamCompare.html)
+> manual page is actually quite detailed and gives common example use cases
+
+Now, let's run a few quantitative tracks that compare the inputs and IP for the Nanog data:
 
 ```bash
 $ bamCompare -b1 bowtie2/H1hesc_Nanog_Rep1_chr12_aln.bam \
   -b2 bowtie2/H1hesc_Input_Rep1_chr12_aln.bam \
-  -o visualization/Nanog_Rep1_chr12.bw 2> visualization/Nanog_Rep1_bamcompare.log
+  -o visualization/Nanog_Rep1_chr12_compare.bw --verbose 2> visualization/Nanog_Rep1_bamcompare.log
 
 $ bamCompare -b1 bowtie2/H1hesc_Nanog_Rep2_chr12_aln.bam \
   -b2 bowtie2/H1hesc_Input_Rep2_chr12_aln.bam \
-  -o visualization/Nanog_Rep2_chr12.bw 2> visualization/Nanog_Rep2_bamcompare.log
+  -o visualization/Nanog_Rep2_chr12_compare.bw --verbose 2> visualization/Nanog_Rep2_bamcompare.log
 ```
+
+Let's do the same for Pou5f1.  Use the above to do this on your own first (no peeking)!
+
+<details>
+<p>
 
 ```bash
 $ bamCompare -b1 bowtie2/H1hesc_Pou5f1_Rep1_chr12_aln.bam \
   -b2 bowtie2/H1hesc_Input_Rep1_chr12_aln.bam \
-  -o visualization/Pou5f1_Rep1_chr12.bw 2> visualization/Pou5f1_Rep1_bamcompare.log
+  -o visualization/Pou5f1_Rep1_chr12_compare.bw --verbose 2> visualization/Pou5f1_Rep1_bamcompare.log
 
 $ bamCompare -b1 bowtie2/H1hesc_Pou5f1_Rep2_chr12_aln.bam \
   -b2 bowtie2/H1hesc_Input_Rep2_chr12_aln.bam \
-  -o visualization/Pou5f1_Rep2_chr12.bw 2> visualization/Pou5f1_Rep2_bamcompare.log
+  -o visualization/Pou5f1_Rep2_chr12_compare.bw --verbose 2> visualization/Pou5f1_Rep2_bamcompare.log
 ```
 
-* Copy over the bigWig files to your laptop using Cyberduck or MobaXTerm.
-* Copy over the BEDtools overlap/intersect files to your computer.
+</p>
+</details>
+<br><br>
 
-* Start IGV and load the 2 rep1 files, and the overlap BED files. You will
-  notice that there are positive and negative values on the track, what do you
-  think this denotes in the context of normalization?
+Now, let's generate simple coverage data for all of our files. Here we
+will use a `for` loop, and will use the `bamCoverage` tool (which works on
+single files). We'll keep it simple and not perform any normalization since we
+primarily are concerned with qualitatively looking at coverage across samples,
+but it's worth keeping in mind you can normalize coverage using `bamCoverage` if
+you want a more quantitative comparison.
+
+> The deeptools help page for 
+> [`bamCoverage`](https://deeptools.readthedocs.io/en/latest/content/tools/bamCoverage.html)
+> also gives more information about options and example use cases
+
+```bash
+$ for bam in bowtie2/*aln.bam
+do
+bw=`basename $bam _aln.bam`
+bamCoverage --binSize 10 -b $bam -o visualization/${bw}.bw -v > visualization/${bw}_bamcoverage.log
+done
+```
+
+Copy over the bigWig files using Cyberduck or MobaXTerm; place them in the
+`chipseq-project` folder in a new directory under `data`, called `bigWigs`.
+Also, copy over the BEDtools overlap/intersect files to your computer and place
+them in a separate folder under `data` called `intersects`.
+
+## IGV
+
+Start IGV, choose 'Human hg19' as the genome. Load the 2 Rep1 bamCompare bigWig
+files, as well as the overlap BED files, and zoom in to chr12 where the coverage is.
+
+You will notice that there are positive and negative values on the track, what
+do you think this denotes in the context of normalization?
 
 > You can generate a simple, non-normalized bigWig with `bamCoverage` and you
 > won't see any negative values.
 
-Here, we'll use a bash loop to run `bamCoverage` on all the original BAM files.
+Now, load in the Rep1 bigWig bamCoverage files. These all have simple positive
+values denoting read coverage for those regions. Note the input.
 
-```
-$ for BAM in bowtie2/*.bam;
-    do \
-    NAME=`basename ${BAM%.bam}`
-    bamCoverage --bam $BAM --outFileFormat bigwig --ignoreDuplicates --outFileName visualization/$NAME.nn.bw 2> visualization/$NAME.bamCoverage.log
-  done
-```
+You can also load in other files, including BAM and narrowPeak files.
 
-* Copy over the newly generated bigWig files to compare.  Note the input.
+Let's open just two BAMs (Nanog Rep1, and Input Rep1). You could hunt and peck
+read coverage; let's look at a pretty significant one reported for MACS2. In the
+location box type (or paste) 'chr12:11761770-11762413', which should be the top
+Nanog Rep1 peak call based on qvalue. Note the bimodal read distribution, and
+notice there are overlapping calls in the BED data (including Pou5f1).
 
-* Copy over the BAM files in the bowtie2 folder (those ending with `*aln.bam`)
-  along with their `*.bai` index files, and open them in IGV.
+Now load in the Pou5f1 Rep1 BAM file. Note the enrichment again, but the
+difference in peak profile.
 
-* Finally, we are going to visually compare our output to the output from the
-  full dataset from ENCODE, by loading that data from the IGV server.
+Finally, we are going to visually compare our output to the output from the full
+dataset from ENCODE, by loading that data from the IGV server.
 
 ***
 *This lesson has been developed by members of the teaching team at the [Harvard
