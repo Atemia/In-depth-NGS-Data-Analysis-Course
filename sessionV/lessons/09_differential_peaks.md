@@ -76,10 +76,13 @@ differences in read densities). We will discuss the importance of each step but
 for more information take a look at the [DiffBind
 vignette](http://bioconductor.org/packages/release/bioc/vignettes/DiffBind/inst/doc/DiffBind.pdf).
 
-
 ### Setting up
 
 1. Open up RStudio and open up the `chipseq-project` that we created previously.
+
+> **Note:** If the desktop folder you had previously is no longer present, you
+> can download [a copy of the folder here](https://uofi.box.com/v/chipseq-project).
+
 2. Open up a new R script ('File' -> 'New File' -> 'Rscript'), and save it as
 `diffbind.R`
 
@@ -92,6 +95,7 @@ Now that we are setup let's load the DiffBind library.
 ```
 library(DiffBind)
 ```
+
 > **NOTE:** You may not need to load this library since it was loaded as a dependency of the ChIPQC package.
 
 ### Reading in Peaksets
@@ -105,6 +109,7 @@ more than two of the samples.* This consensus set represents the overall set of
 candidate binding sites to be used in further analysis.
 
 ```
+# Read in data
 samples <- read.csv('meta/samplesheet_chr12.csv')
 dbObj <- dba(sampleSheet=samples)
 ```
@@ -114,7 +119,7 @@ consensus sites were identified for this dataset? Which sample has a
 disproportionatley larger number of peaks?*
 
 ```
-> dbObj
+# Type in `dbObj` to print out summary
 
 4 Samples, 79 sites in matrix (252 total):
            ID Factor Replicate Caller Intervals
