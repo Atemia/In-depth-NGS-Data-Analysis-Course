@@ -170,9 +170,8 @@ using all 83 consensus sites. You should see both Nanog and Pou5f1 replicates
 clustering together.
 
 ```r
-
+# PCA plot
 dba.plotPCA(dbObj,  attributes=DBA_FACTOR, label=DBA_ID)
-
 ```
 
 <img src="../img/pcaplot.png" width=600>
@@ -182,9 +181,8 @@ We can also plot a **correlation heatmap**, to evaluate the relationship between
 samples.
 
 ```r
-
+# corr heatmap
 plot(dbObj)
-
 ```
 
 <img src="../img/db-heatmap.png" width=600>
@@ -196,9 +194,8 @@ To evaluate how many peaks overlap between all samples we can plot a **Venn
 diagram**:
 
 ```r
-
+# Venn
 dba.plotVenn(dbObj, 1:4)
-
 ```
 
 <img src="../img/venn-db.png" width=600>
@@ -212,9 +209,8 @@ of interest which is the different transcription factor IPs. Contrasts are set
 up using the `dba.contrast` function, as follows:
 
 ```r
-
+# Contrast
 dbObj <- dba.contrast(dbObj, categories=DBA_FACTOR, minMembers = 2)
-
 ```
 
 ### Performing the differential analysis
@@ -225,9 +221,8 @@ analysis, which enables binding sites to be identified that are **statistically 
 The main differential analysis function is invoked as follows:
 
 ```r
-
+# Analyze (uses edgeR and DESeq2)
 dbObj <- dba.analyze(dbObj, method=DBA_ALL_METHODS)
-
 ```
 
 To see a summary of results for each tool we can use `dba.show`:
@@ -248,9 +243,8 @@ Try plotting a PCA but this time **only use the regions that were identified as
 significant by DESeq2** using the code below.
 
 ```r
-
+# PCA limited to DESeq2 significant regions
 dba.plotPCA(dbObj, contrast=1, method=DBA_DESEQ2, attributes=DBA_FACTOR, label=DBA_ID)
-
 ```
 
 <img src="../img/deseq2-pca.png" width=600>
@@ -262,9 +256,8 @@ dba.plotPCA(dbObj, contrast=1, method=DBA_DESEQ2, attributes=DBA_FACTOR, label=D
 For a quick look at the **overlapping peaks** identified by the two different tools (DESeq2 and edgeR) we can plot a Venn diagram.
 
 ```
-
+# Overlapping peaks
 dba.plotVenn(dbObj,contrast=1,method=DBA_ALL_METHODS)
-
 ```
 
 <img src="../img/venn-deseq-edger.png" width=600>
@@ -276,16 +269,15 @@ dba.plotVenn(dbObj,contrast=1,method=DBA_ALL_METHODS)
 To extract the full results from each method we use `dba.report`:
 
 ```
-
+# Full results
 comp1.edgeR <- dba.report(dbObj, method=DBA_EDGER, contrast = 1, th=1)
 comp1.deseq <- dba.report(dbObj, method=DBA_DESEQ2, contrast = 1, th=1)
-
 ```
 
 **These results files contain the genomic coordinates for all consensus site and statistics for differential enrichment including fold-change, p-value and FDR.**
 
 ```
-> head(comp1.edgeR)
+# Type in `head(comp1.edgeR)`
 
 GRanges object with 6 ranges and 6 metadata columns:
      seqnames               ranges strand |      Conc Conc_Nanog Conc_Pou5f1      Fold   p-value       FDR
@@ -320,9 +312,8 @@ as well as seeing which of the data points are being identified as
 differentially bound.
 
 ```
-
+# MA Plot
 dba.plotMA(dbObj, method=DBA_DESEQ2)
-
 ```
 
 <img src="../img/maplot.png" width=600>
@@ -336,9 +327,8 @@ data can also be shown with the **concentrations of each sample groups plotted
 against each other**.
 
 ```
-
+# MA Plot - Nanog vs Pou5F1
 dba.plotMA(dbObj, bXY=TRUE)
-
 ```
 
 <img src="../img/maplotXY.png" width=600>
@@ -347,9 +337,8 @@ If we want to see **how the reads are distributed amongst the different classes
 of differentially bound sites and sample group**s, we can use a boxplot:
 
 ```
-
+# Boxplot
 pvals <- dba.plotBox(dbObj)
-
 ```
 
 <img src="../img/boxplot-db.png" width=600>
@@ -375,7 +364,6 @@ it to a data frame so that genomic coordinates get written as columns and not
 GRanges.
 
 ```
-
 # EdgeR
 out <- as.data.frame(comp1.edgeR)
 write.table(out, file="results/Nanog_vs_Pou5f1_edgeR.txt", sep="\t", quote=F, col.names = NA)
@@ -383,7 +371,6 @@ write.table(out, file="results/Nanog_vs_Pou5f1_edgeR.txt", sep="\t", quote=F, co
 # DESeq2
 out <- as.data.frame(comp1.deseq)
 write.table(out, file="results/Nanog_vs_Pou5f1_deseq2.txt", sep="\t", quote=F, col.names = NA)
-
 ````
 
 Additionally, we will want to create BED files for each set of significant

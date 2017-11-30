@@ -58,7 +58,7 @@ $ cut -f 1,2,3 Encode-hesc-Nanog.narrowPeak | sort -k1,1V -k2,2n -k3,3n > Encode
 
 Now to explain that last line. We're using a few Linux command-line tools to
 manipulate the data. `cut` will extract the first three fields (`-f 1,2,3`) from
-the BED file. This is then 'piped' into the `sort` command, which will first
+the narrowPeak file. This is then 'piped' into the `sort` command, which will first
 sort the BED data by the first column (`-k1,1V`) naturally based on the name
 (chr1 first, then chr2, chr3...), then numerically in ascending order by the
 second then third columns (`-k2,2n -k3,3n`). Sorting the BED file is a good
