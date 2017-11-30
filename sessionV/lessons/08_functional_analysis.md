@@ -175,7 +175,7 @@ parameters, as well as links to the results at the top of the screen.
 ![results_page](../img/dreme_processing.png)
 
 This may take some time depending on the server load and the size of the file.
-While you wait, take a look at the expected results from the [full dataset](http://meme-suite.org/info/status?service=DREME&id=appDREME_4.12.01498734583679762350802).
+While you wait, take a look at the expected results from the [full dataset](http://meme-suite.org/opal-jobs/appDREME_4.12.01512018123034-1407209238/dreme.html).
 
 ![dreme_output](../img/dreme_output.png)
 
