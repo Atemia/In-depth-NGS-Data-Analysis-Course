@@ -245,4 +245,6 @@ be centered in the peaks) and to combine related motifs into similarity
 clusters. It is able to identify longer motifs < 30bp, but takes much longer to
 run.
 
+An example run using the data set above is [here](http://meme-suite.org/opal-jobs/appMEMECHIP_4.12.015120185967141668341705/meme-chip.html).
+
 > ![](../img/meme_chip_output.png)
