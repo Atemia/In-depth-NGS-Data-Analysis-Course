@@ -30,18 +30,19 @@ We will explore a few useful web-based tools for performing these analyses using
 
 Since the motif and functional enrichment analyses are unlikely to give reliable
 results using only the 32.8 Mb of reads mapping to chr12, we will use the **full
-set of peak calls output from the IDR analysis**.
+set of peak calls output from the ENCODE run for Nanog**.
 
 ## Set-up
 
-Start an interactive session:
+Back to the cluster (for a short spell). Log in using your classroom
+information, and start an interactive session:
 
 ```bash
-$ bsub -Is -q interactive bash
+$ srun -n 2 --mem 2000 -p classroom --pty bash
 ```
 
-Extract the first three columns of the IDR peak calls for the whole genome of
-Nanog:
+Extract the first three columns of the peak calls for the whole genome of
+Nanog (here we are using the ENCODE calls for Nanog).
 
 ```bash
 $ cd ~/ngs_course/chipseq/results
@@ -50,46 +51,52 @@ $ mkdir functional_analysis
 
 $ cd functional_analysis
 
-$ cp /groups/hbctraining/chip-seq/full-dataset/idr/*.bed .
+$ cp /home/classroom/hpcbio/chip-seq/ENCODE/Encode-hesc-Nanog.narrowPeak .
 
-$ cut -f 1,2,3 Nanog-idr-merged.bed  > Nanog-idr-merged-great.bed
+$ cut -f 1,2,3 Encode-hesc-Nanog.narrowPeak | sort -k1,1V -k2,2n -k3,3n > Encode-hesc-Nanog-great.bed
 ```
 
+Now to explain that last line. We're using a few Linux command-line tools to
+manipulate the data. `cut` will extract the first three fields (`-f 1,2,3`) from
+the BED file. This is then 'piped' into the `sort` command, which will first
+sort the BED data by the first column (`-k1,1V`) naturally based on the name
+(chr1 first, then chr2, chr3...), then numerically in ascending order by the
+second then third columns (`-k2,2n -k3,3n`). Sorting the BED file is a good
+practice to get into, as many tools require or work much faster
+with a coordinate-sorted file.
+
 To extract the sequences corresponding to the peak coordinates for motif
-discovery, we will use the
+discovery, we have a couple of choices.  Here we will use the
 [bedtools](http://bedtools.readthedocs.org/en/latest/content/bedtools-suite.html)
 suite of tools. The `getfasta` command extracts sequences from a reference fasta
 file for each of the coordinates defined in a BED/GFF/VCF file.
 
 ```bash
-$ module load seq/BEDtools/2.23.0
+$ module load BEDTools/2.26.0-IGB-gcc-4.9.4
 
 $ bedtools getfasta -fi \
-/groups/shared_databases/igenome/Homo_sapiens/UCSC/hg19/Sequence/WholeGenomeFasta/genome.fa \
--bed Nanog-idr-merged-great.bed \
--fo Nanog-idr-merged-dreme.fasta
+/home/mirror/igenome/Homo_sapiens/UCSC/hg19/Sequence/WholeGenomeFasta/genome.fa \
+-bed Encode-hesc-Nanog-great.bed \
+-fo Encode-hesc-Nanog-great.fasta
 ```
 
 Using `scp` or **Cyberduck** on your local computer, transfer
-`Nanog-idr-merged-great.bed` and `Nanog-idr-merged-dreme.fasta` to your Desktop.
-
-```bash
-$ scp username@transfer.orchestra.med.harvard.edu:~/ngs_course/chipseq/results/functional_analysis/*merged-* Desktop/
-```
+`Encode-hesc-Nanog-great.bed` and `Encode-hesc-Nanog-great.fasta` to your Desktop.
 
 ## Functional enrichment analysis
 
-We will use [GREAT](http://bejerano.stanford.edu/great/public/html/index.php) to
+We will use [GREAT](http://great.stanford.edu/public/html/) to
 perform the functional enrichment analysis. GREAT takes a list of regions,
 associates them with nearby genes, and then analyzes the gene annotations to
 assign biological meaning to the data.
 
-Open [GREAT](http://bejerano.stanford.edu/great/public/html/index.php), and
+Open [GREAT](http://great.stanford.edu/public/html/), and
 perform the following steps:
 
-1. Choose the `Nanog-idr-merged-great.bed` file and use the `Whole genome` for
-Background regions. Click Submit. GREAT provides the output in HTML format
-organized by section.
+1. Select 'Human' as the reference (we used hg19). Choose the
+`Encode-hesc-Nanog-great.bed` file and use the `Whole genome` for Background
+regions.  Then click Submit. GREAT provides the output in HTML format organized by
+section.
 
 2. Expand the `Job Description` section. Click on `View all genomic region-gene
 associations`. Note that each associated gene is listed with location from the
@@ -120,22 +127,21 @@ changing settings, and visualization.
 
 GREAT calculates two measures of statistical enrichment: "one using a binomial
 test over genomic regions and one using a hypergeometric test over genes"
-[[2](http://bejerano.stanford.edu/help/display/GREAT/Statistics)]. Each test
+[[2](http://great.stanford.edu/help/display/GREAT/Statistics)]. Each test
 has its own biases, which are compensated for by the other test.
 
-6. Click on the term `negative regulation of stem cell differentiation`:
+6. Click on the term `Negative regulation of stem cell differentiation`:
 
 	![select_go](../img/great_selection_go.png)
 
- Note that summary information about the binding sites of Nanog for genes
- associated with this GO term are displayed.
+Note that summary information about the binding sites of Nanog for genes
+associated with this GO term are displayed.
 
 7. Expand the section for `This term's genomic region-gene association tables`.
 Notice that you have the option to download the gene table.
 
-8. Click on `NOTCH1`. Explore the binding regions directly within the UCSC
-Genome Browser.
-
+8. Click on any of the genes in the list (for example, 'NOTCH1'). Explore the
+binding regions directly within the UCSC Genome Browser.
 
 ## Motif discovery
 
@@ -152,13 +158,13 @@ nucleotides) encompassing the DNA-binding region of most eukaryotic monomeric
 transcription factors. Therefore it may miss wider motifs due to binding by
 large transcription factor complexes.
 
-
 ### DREME
 
 Visit the [DREME website](http://meme-suite.org/tools/dreme) and perform the
 following steps:
 
-1. Select the downloaded `Nanog-idr-merged-dreme.fasta` as input to DREME
+1. Select the downloaded `Encode-hesc-Nanog-great.fasta` as input to DREME. Leave
+all other options as they are set
 2. Enter your email address so that DREME can email you once the analysis is complete
 3. Enter a job description so you will recognize which job has been emailed to
 you and then start the search
@@ -169,8 +175,7 @@ parameters, as well as links to the results at the top of the screen.
 ![results_page](../img/dreme_processing.png)
 
 This may take some time depending on the server load and the size of the file.
-While you wait, take a look at the expected results from the [full
-dataset](http://meme-suite.org/info/status?service=DREME&id=appDREME_4.12.01498734583679762350802).
+While you wait, take a look at the expected results from the [full dataset](http://meme-suite.org/info/status?service=DREME&id=appDREME_4.12.01498734583679762350802).
 
 ![dreme_output](../img/dreme_output.png)
 

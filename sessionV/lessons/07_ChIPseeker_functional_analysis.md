@@ -37,7 +37,8 @@ enrichment analyses of functional annotations.
 
 1. Open up RStudio and open up the `chipseq-project` that we created previously.
 
-> **Note:** If the desktop folder you had previously is no longer present, you can download a copy of the folder here:
+> **Note:** If the desktop folder you had previously is no longer present, you
+> can download [a copy of the folder here](https://uofi.box.com/v/chipseq-project).
 
 2. Open up a new R script ('File' -> 'New File' -> 'Rscript'), and save it as `chipseeker.R`
 
