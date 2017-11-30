@@ -271,6 +271,8 @@ categories.
 upsetplot(peakAnnoList[["Nanog"]], sets.bar.color = "lightgreen")
 ```
 
+<img src="../img/upset_plot.png" width=500>
+
 ### Barchart
 
 We'll run both Nanog and Pou5f1 here for comparison.
