@@ -54,6 +54,7 @@ biocLite("clusterProfiler")
 biocLite("biomaRt")
 biocLite("TxDb.Hsapiens.UCSC.hg19.knownGene")
 biocLite("org.Hs.eg.db")
+biocLite("BiocParallel")
 ```
 
 ## Getting data
@@ -74,7 +75,7 @@ You can do this using `Cyberduck` or `MobaXterm` (you can also use 'scp' or
 similar from a Mac terminal).
 
 Move over the **BED files from Biocluster
-(`/home/classroom/hpcbio/chip-seq/idr-bed/*.bed`) to your laptop**. You will
+(`/home/classroom/hpcbio/chip-seq/idr-bed/*.bed`) to your desktop**. You will
 want to copy these files into your chipseq-project **into a
 new folder called `data/idr-bed`.**
 
@@ -82,6 +83,8 @@ Let's start by loading the libraries.  Type these into your 'Source' window in t
 
 ```r
 # Load libraries
+library(BiocParallel)
+register(SerialParam())
 library(ChIPseeker)
 library(TxDb.Hsapiens.UCSC.hg19.knownGene)
 library(clusterProfiler)
@@ -324,6 +327,9 @@ following priority in genomic annotation.
 * Downstream (defined as the downstream of gene end)
 * Intergenic
 
+V4 and V5 are generic names R assigns to columns without IDs; these correspond
+to the peak name and peak weight.
+
 One thing we **don't have is gene symbols** listed in table, but we can fetch
 them using **Biomart** and add them to the table before we write to file. This
 makes it easier to browse through the results.
@@ -337,18 +343,34 @@ ensembl_genes <- useMart('ENSEMBL_MART_ENSEMBL',
                         host =  'www.ensembl.org')
 
 # Create human mart object
-human <- useDataset("hsapiens_gene_ensembl", useMart('ENSEMBL_MART_ENSEMBL',
-                           host =  'www.ensembl.org'))
+human <- useDataset("hsapiens_gene_ensembl", ensembl_genes)
 
 # Get entrez to gene symbol mappings
 entrez2gene <- getBM(filters = "entrezgene",
                      values = entrez,
                      attributes = c("external_gene_name", "entrezgene"),
                      mart = human)
+```
 
-# Match the rows and add gene symbol as a column
+Here we do a bit of cleanup; we are matching the information in the table we get
+back from biomart based on EntrezGene ID, then (if it's defined) getting the
+gene symbol, and finally gluing the information in the middle of the table with
+`cbind`.   We finally write to a tab-delimited file.
+
+```
+# Match the rows (gets a list of the position, or index, of match)
 m <- match(nanog_annot$geneId, entrez2gene$entrezgene)
-out <- cbind(nanog_annot[,1:13], geneSymbol=entrez2gene$external_gene_name[m], nanog_annot[,14:ncol(nanog_annot)])
+
+# Create a gene list, but check for no matches (NA); make this an empty string
+# if no match
+genesymbols <- ifelse(is.na(entrez2gene$external_gene_name[m]),
+                      '',
+                      entrez2gene$external_gene_name[m])
+
+# Glue new table together, sticking the gene symbols in column 14
+out <- cbind(nanog_annot[,1:13],
+             geneSymbol=genesymbols,
+             nanog_annot[,14:ncol(nanog_annot)])
 
 # Write to file
 write.table(out, file="results/Nanog_annotation.txt", sep="\t", quote=F, row.names=F)
